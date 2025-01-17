@@ -1,0 +1,14 @@
+shared_bucket: "testing"
+source_folder: "some/folder/"
+destination_folder: "some/folder"
+memory_size: 3
+pseudo:
+  - task_one:
+    columns: [ "fnr" ]
+    pseudo_operation: "PSEUDO"
+    encryption_algorithm: "papis_compatible"
+  - task_two:
+    columns: [ "snr" ]
+    pseudo_operation: "PSEUDO"
+    encryption_algorithm: "sid_mapping"
+    encryption_args: [ "2024-03-27" ]

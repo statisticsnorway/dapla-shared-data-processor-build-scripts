@@ -1,0 +1,14 @@
+[project]
+name = "delomaten-configuration-tests"
+version = "0.1.0"
+description = "Tests the user configuration for pseudonymizing data to be shared across teams"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "asdf>=4.0.0",
+    "pytest>=8.3.4",
+]
+
+[tool.pytest.ini_options]
+asdf_schema_root = "./config_schema.yaml"
+asdf_schema_tests_enabled = "true"
