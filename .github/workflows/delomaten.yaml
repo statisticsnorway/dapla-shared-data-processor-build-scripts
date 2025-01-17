@@ -149,6 +149,9 @@ jobs:
           done
           MATRIX+="]"
 
+          echo "HERE IS THE MATRIX NOW!!!!!"
+          echo "$MATRIX"
+
           # If all sources have been deleted (indicated by 'all_sources_deleted' output being 'true'),
           # we add the special keyword 'all_sources_deleted' to the matrix to ensure the 'test' job is triggered.
           if [ "${{ steps.check_all_sources_deleted.outputs.all_sources_deleted }}" == "true" ]; then
