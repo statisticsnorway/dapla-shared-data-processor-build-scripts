@@ -8,15 +8,9 @@ on:
         default: ''
         required: false
         type: string
-      build-scripts-version-main:
-        description: "Use the main branch of build scripts (used for testing)"
-        type: string
-        required: false
-        default: 'false'
 
 env:
   VERSION_OVERRIDE: ${{ inputs.version-override || '' }}
-  BUILD_SCRIPT_VERSION_MAIN: ${{ inputs.build-scripts-version-main || '' }}
 
 permissions:
   contents: 'read'
@@ -52,7 +46,7 @@ jobs:
             echo "Running on main branch"
             echo "should_run_fetch_sources=true" >> $GITHUB_OUTPUT
           elif [ -z "$CHANGED_FILES" ]; then
-            echo "Error: No changes detected in automation/source-data/ compared to main branch."
+            echo "Error: No changes detected in automation/shared-data/ compared to main branch."
             echo "should_run_fetch_sources=false" >> $GITHUB_OUTPUT
           else
             echo "Changes detected in automation/shared-data/"
@@ -100,7 +94,7 @@ jobs:
           if [ -n "$VERSION_OVERRIDE" ]; then
             base_image_version="$VERSION_OVERRIDE"
           else
-            curl -o version.yaml https://raw.githubusercontent.com/statisticsnorway/dapla-source-data-processor-build-scripts/ack-immediately/version.yaml
+            curl -o version.yaml https://raw.githubusercontent.com/statisticsnorway/dapla-shared-data-processor-build-scripts/refs/heads/add-gha-for-delomaten/version.yaml
             base_image_version=$(yq e '.version' version.yaml)
           fi
           echo "base_image_version=$base_image_version" >> "$GITHUB_OUTPUT"
@@ -139,6 +133,8 @@ jobs:
       - name: Create matrix
         id: step_create_matrix
         run: |
+          set -x
+
           MATRIX="["
           first=true
 
