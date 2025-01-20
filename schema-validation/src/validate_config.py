@@ -25,7 +25,9 @@ def validate_config(environment: str, folder: str, directory_path: str) -> None:
     # We expect to find a config.yaml file in the directory
     if not os.path.exists(config_data_path):
         print(
-          f"""\n\n
+          f"""
+
+
           No "config.yaml" file exists for the product source "{os.path.join(environment, folder)}".
 
           The full path being search here is "{directory_path}".
