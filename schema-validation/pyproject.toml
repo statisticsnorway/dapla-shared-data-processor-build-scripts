@@ -1,5 +1,5 @@
 [project]
-name = "delomaten-configuration-tests"
+name = "delomaten-schema-validation"
 version = "0.1.0"
 description = "Tests the user configuration for pseudonymizing data to be shared across teams"
 readme = "README.md"
