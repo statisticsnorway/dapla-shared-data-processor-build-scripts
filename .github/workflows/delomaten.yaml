@@ -227,24 +227,10 @@ jobs:
           echo "Running test for source: $FOLDER_NAME-$ENV_NAME"
 
           set -xe
-          export CONFIG_FILE_PATH="$(pwd)/$ENV_NAME/$FOLDER_NAME"
+          export CONFIG_FILE_PATH="${{ github.workspace }}/$ENV_NAME/$FOLDER_NAME"
           cd dapla-shared-data-processor-build-scripts/schema-validation
 
           uv run python src/validate_config.py "$CONFIG_FILE_PATH"
-
-      # - name: Install python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: '3.13'
-      # - name: Run tests for ${{ matrix.source }}
-      #   if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
-      #   run: |
-      #     MATRIX=${{ matrix.source }}
-      #     IFS=',' read -r FOLDER_NAME ENV_NAME <<< "$MATRIX"
-      #     echo "Running test for source: $FOLDER_NAME-$ENV_NAME"
-
-      #     cd scripts
-      #     uv run src/validate_config.py $FOLDER_NAME
 
 #   plan:
 #     if: ${{ github.event_name == 'pull_request' }}
