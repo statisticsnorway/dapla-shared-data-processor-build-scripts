@@ -208,7 +208,7 @@ jobs:
           export CONFIG_FILE_PATH="$GITHUB_WORKSPACE/automation/shared-data/$ENV_NAME/$FOLDER_NAME"
           cd dapla-shared-data-processor-build-scripts/schema-validation
 
-          uv run python src/validate_config.py "$CONFIG_FILE_PATH"
+          uv run python src/validate_config.py "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH"
 
 #   plan:
 #     if: ${{ github.event_name == 'pull_request' }}
