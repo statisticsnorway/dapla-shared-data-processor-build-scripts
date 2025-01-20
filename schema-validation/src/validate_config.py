@@ -18,11 +18,17 @@ def validate_config(environment: str, folder: str, directory_path: str) -> None:
         print(f'The given directory path "{directory_path}" does not exist')
         sys.exit(1)
 
-    # We only expect to find a config.yaml file
     config_data_path: str = os.path.join(directory_path, 'config.yaml')
 
+    # We expect to find a config.yaml file in the directory
     if not os.path.exists(config_data_path):
-        print(f'Could not find the "config.yaml" file at "{directory_path}"')
+        print(
+          f"""
+            Could not find the "config.yaml" file for the product source "{os.path.join(environment, folder)}".
+
+            The full path being search here is "{directory_path}".
+          """
+        )
         sys.exit(1)
 
     with open(config_data_path) as stream:
@@ -32,7 +38,6 @@ def validate_config(environment: str, folder: str, directory_path: str) -> None:
         config_schema: object = yaml.safe_load(stream.read())
 
     contextual_path = os.path.join(environment, folder, 'config.yaml')
-
     try:
         validate(config_data, schema=config_schema)
         print(f'The configuration file "{contextual_path}" is valid!')
