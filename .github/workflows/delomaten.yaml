@@ -212,6 +212,9 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           version: '0.5.18'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: Clone test scripts
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
         run: |
@@ -222,13 +225,13 @@ jobs:
           MATRIX=${{ matrix.source }}
           IFS=',' read -r FOLDER_NAME ENV_NAME <<< "$MATRIX"
           echo "Running test for source: $FOLDER_NAME-$ENV_NAME"
-          docker run -v "$(pwd):/workspace" \
-          -u root \
-          -w /workspace \
-          -e ENV_NAME="$ENV_NAME" \
-          -e FOLDER_NAME="$FOLDER_NAME" \
-          ${{ needs.fetch_sources.outputs.base_registry }}/base-image:${{ needs.fetch_sources.outputs.base_image_version }} \
-          dapla-shared-data-processor-build-scripts/run_tests.sh
+
+          set -xe
+          export CONFIG_FILE_PATH="$(pwd)/$ENV_NAME/$FOLDER_NAME"
+          cd dapla-shared-data-processor-build-scripts/schema-validation
+
+          uv run python src/validate_config.py "$CONFIG_FILE_PATH"
+
       # - name: Install python
       #   uses: actions/setup-python@v5
       #   with:
