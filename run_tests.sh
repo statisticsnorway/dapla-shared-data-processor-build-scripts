@@ -9,8 +9,11 @@ set -ex
 source /opt/pysetup/.venv/bin/activate
 
 # Install test requirements
-# cd /workspace/dapla-shared-data-processor-build-scripts/scripts
-python -m pip install -r requirements.txt
+cd /workspace/dapla-shared-data-processor-build-scripts/schema-validation/
+python -m pip install "uv>=0.5.21"
+
+uv run python src/validate_config.py "/workspace/automation/shared-data/$ENV_NAME/$FOLDER_NAME"
+
 # Run pytests
 # pytest
 # echo "## No errors found by pytest"

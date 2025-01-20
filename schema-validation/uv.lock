@@ -60,7 +60,7 @@ wheels = [
 ]
 
 [[package]]
-name = "delomaten-configuration-tests"
+name = "delomaten-schema-validation"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
