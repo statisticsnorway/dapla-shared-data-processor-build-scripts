@@ -5,9 +5,6 @@
 # Exit on error and log all commands
 set -ex
 
-# Source packages from base image build
-source /opt/pysetup/.venv/bin/activate
-
 # Install test requirements
 cd /workspace/dapla-shared-data-processor-build-scripts/schema-validation/
 python -m pip install "uv>=0.5.21"
