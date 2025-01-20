@@ -149,9 +149,6 @@ jobs:
           done
           MATRIX+="]"
 
-          echo "HERE IS THE MATRIX NOW!!!!!"
-          echo "$MATRIX"
-
           # If all sources have been deleted (indicated by 'all_sources_deleted' output being 'true'),
           # we add the special keyword 'all_sources_deleted' to the matrix to ensure the 'test' job is triggered.
           if [ "${{ steps.check_all_sources_deleted.outputs.all_sources_deleted }}" == "true" ]; then
@@ -161,7 +158,6 @@ jobs:
               echo "Error: Could not find any sources for Delomaten. Please verify that your source configuration matches the description in the Dapla manual: https://manual.dapla.ssb.no/automatisering.html#konfigurere-en-kilde"
               exit 1
           fi
-
 
           echo "Matrix value: $MATRIX"
           echo "env_matrix=$MATRIX" >> $GITHUB_OUTPUT
@@ -189,6 +185,9 @@ jobs:
         # This allows the 'test' job to finish successfully.
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
         uses: actions/checkout@v4
+        with:
+          repository: statisticsnorway/dapla-shared-data-processor-build-scripts
+          ref: main
       - id: "auth"
         name: "Authenticate to Google Cloud"
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
