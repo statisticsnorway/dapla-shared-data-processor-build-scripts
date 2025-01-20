@@ -14,8 +14,10 @@ def validate_config(environment: str, folder: str, directory_path: str) -> None:
         @directory_path: The absolute directory path inside the GHA runner which contains the config.yaml file
 
     """
+    product_name = 'delomaten' # name is pending
+
     if not os.path.exists(directory_path):
-        print(f'The given directory path "{directory_path}" does not exist')
+        print(f'\n\nThe given directory path "{directory_path}" does not exist')
         sys.exit(1)
 
     config_data_path: str = os.path.join(directory_path, 'config.yaml')
@@ -23,7 +25,7 @@ def validate_config(environment: str, folder: str, directory_path: str) -> None:
     # We expect to find a config.yaml file in the directory
     if not os.path.exists(config_data_path):
         print(
-          f"""
+          f"""\n\n
             Could not find the "config.yaml" file for the product source "{os.path.join(environment, folder)}".
 
             The full path being search here is "{directory_path}".
@@ -40,10 +42,10 @@ def validate_config(environment: str, folder: str, directory_path: str) -> None:
     contextual_path = os.path.join(environment, folder, 'config.yaml')
     try:
         validate(config_data, schema=config_schema)
-        print(f'The configuration file "{contextual_path}" is valid!')
+        print(f'\n\nThe {product_name} configuration file "{contextual_path}" is valid!')
         sys.exit(0)
     except ValidationError as e:
-        print(f'The configuration file "{contextual_path}" is invalid:\n\n{e}')
+        print(f'\n\nThe {product_name} configuration file "{contextual_path}" is invalid:\n\n{e}')
         sys.exit(1)
 
 if __name__ == '__main__':
