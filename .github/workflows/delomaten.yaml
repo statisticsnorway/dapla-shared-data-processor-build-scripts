@@ -187,24 +187,6 @@ jobs:
         # This allows the 'test' job to finish successfully.
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
         uses: actions/checkout@v4
-      # - id: "auth"
-      #   name: "Authenticate to Google Cloud"
-      #   if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
-      #   uses: "google-github-actions/auth@v1.1.1"
-      #   with:
-      #     workload_identity_provider: ${{ needs.fetch_sources.outputs.workload_identity_provider }}
-      #     service_account: ${{ needs.fetch_sources.outputs.service_account }}
-      #     token_format: "access_token"
-      # - name: Login to registry
-      #   if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
-      #   uses: docker/login-action@v2
-      #   with:
-      #     registry: ${{ needs.fetch_sources.outputs.base_registry }}
-      #     username: "oauth2accesstoken"
-      #     password: "${{ steps.auth.outputs.access_token }}"
-      # - name: Pull base image
-      #   if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
-      #   run: docker pull ${{ needs.fetch_sources.outputs.base_registry }}/base-image:${{ needs.fetch_sources.outputs.base_image_version }}
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
