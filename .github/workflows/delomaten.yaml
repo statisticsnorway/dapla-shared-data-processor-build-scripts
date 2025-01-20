@@ -223,10 +223,7 @@ jobs:
           IFS=',' read -r FOLDER_NAME ENV_NAME <<< "$MATRIX"
           echo "Running test for source: $FOLDER_NAME-$ENV_NAME"
 
-          set -xe
-          echo "$GITHUB_WORKSPACE"
-          ls "$GITHUB_WORKSPACE"
-          export CONFIG_FILE_PATH="$GITHUB_WORKSPACE/$ENV_NAME/$FOLDER_NAME"
+          export CONFIG_FILE_PATH="$GITHUB_WORKSPACE/automation/shared-data/$ENV_NAME/$FOLDER_NAME"
           cd dapla-shared-data-processor-build-scripts/schema-validation
 
           uv run python src/validate_config.py "$CONFIG_FILE_PATH"
