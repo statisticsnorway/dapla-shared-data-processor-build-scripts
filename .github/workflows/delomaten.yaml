@@ -81,7 +81,9 @@ jobs:
           service_account="gh-actions-${team}@${gar_project_id}.iam.gserviceaccount.com"
           echo "service_account=$service_account" >> $GITHUB_OUTPUT
 
-          base_registry="europe-north1-docker.pkg.dev/${gar_project_id}/dapla-felles-docker/automation/shared-data"
+          # The base image is shared between the source-data and shared-data automation
+          # services
+          base_registry="europe-north1-docker.pkg.dev/${gar_project_id}/dapla-felles-docker/automation/source-data"
           echo "base_registry=$base_registry" >> $GITHUB_OUTPUT
 
           team_registry="europe-north1-docker.pkg.dev/${gar_project_id}/${team}-docker/automation/shared-data"
