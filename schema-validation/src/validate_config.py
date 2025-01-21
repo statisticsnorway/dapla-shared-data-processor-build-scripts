@@ -35,7 +35,7 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
 
     # We expect to find a config.yaml file in the directory
     if not os.path.exists(config_data_path):
-        print(
+        errorConsole.print(
           f"""
 
 
