@@ -10,7 +10,11 @@ import yaml
 # Highlights all text in red
 class ErrorHighlighter(Highlighter):
     def highlight(self, text):
-        text.stylize(Style(color=Color.from_rgb(255,0,0), frame=True), 0, len(text))
+        text.stylize(Style(color=Color.from_rgb(255,0,0)), 0, len(text))
+
+class SuccessHighlighter(Highlighter):
+    def highlight(self, text):
+        text.stylize(Style(color=Color.from_rgb(0,255,0)), 0, len(text))
 
 # Force terminal so that colours are printed in the github action runner
 errorConsole = Console(highlighter=ErrorHighlighter(), force_terminal=True)
@@ -61,10 +65,8 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
     contextual_path = os.path.join(environment, folder, 'config.yaml')
     try:
         validate(config_data, schema=config_schema)
-        errorConsole.print(f'\n\nThe delomaten configuration file "{contextual_path}" is valid!')
-        sys.exit(0)
     except ValidationError as e:
-        errorConsole.print(f'\n\nThe delomaten configuration file "{contextual_path}" is invalid:\n\n{e}')
+        errorConsole.print(f'\n\nThe delomaten configuration file "{contextual_path}" is invalid:\n\n{e}\n\n')
         sys.exit(1)
 
     with open(shared_buckets_path) as stream:
