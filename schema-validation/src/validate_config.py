@@ -85,5 +85,5 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
 
 
 if __name__ == '__main__':
-  [environment, folder, directory_path, *rest] = sys.argv[1:]
-  validate_config(environment, folder, directory_path)
+  [environment, folder, directory_path, shared_buckets_file_path, *rest] = sys.argv[1:]
+  validate_config(environment, folder, directory_path, shared_buckets_file_path)
