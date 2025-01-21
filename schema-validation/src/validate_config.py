@@ -19,6 +19,7 @@ class SuccessHighlighter(Highlighter):
 
 # Force terminal so that colours are printed in the github action runner
 errorConsole = Console(highlighter=ErrorHighlighter(), force_terminal=True)
+console = Console(highlighter=SuccessHighlighter(), force_terminal=True)
 
 def validate_config(environment: str, folder: str, directory_path: str, shared_buckets_path: str) -> None:
     """
@@ -41,15 +42,7 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
     # We expect to find a config.yaml file in the directory
     if not os.path.exists(config_data_path):
         errorConsole.print(
-          f"""
-
-
-          No "config.yaml" file exists for the product source "{os.path.join(environment, folder)}".
-
-          The full path being search here is "{directory_path}".
-
-
-          """
+            f'\n\nNo "config.yaml" file exists in the product source folder "{os.path.join(environment, folder)}"\n\n'
         )
         sys.exit(1)
 
@@ -73,6 +66,7 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
     with open(shared_buckets_path) as stream:
         shared_buckets_data: object = yaml.safe_load(stream.read())
 
+    # If the shared bucket name specified in the config.yaml doesn't exist in the dapla team, report an error
     if config_data['shared_bucket'] not in shared_buckets_data['buckets'].keys():
         errorConsole.print(textwrap.dedent(
             f"""
@@ -88,6 +82,7 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
         ))
         sys.exit(1)
 
+    console.print(f'The "{contextual_path}" configuration was successfully validated!')
 
 if __name__ == '__main__':
   [environment, folder, directory_path, shared_buckets_file_path, *rest] = sys.argv[1:]
