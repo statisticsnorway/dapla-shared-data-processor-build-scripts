@@ -211,7 +211,7 @@ jobs:
           export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$ENV_NAME/iam.yaml"
           cd dapla-shared-data-processor-build-scripts/schema-validation
 
-          uv run python src/validate_config.py "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
+          uv run python -u src/validate_config.py "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
 
 #   plan:
 #     if: ${{ github.event_name == 'pull_request' }}
