@@ -78,7 +78,7 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
             f"""
 
 
-            In the configuration file "{contextual_path}" in the field 'shared_bucket' the provided bucket {config_data['shared_bucket']} does not exist.
+            In the configuration file "{contextual_path}" in the field "shared_bucket" the provided bucket "{config_data['shared_bucket']}" does not exist.
 
             Existing shared buckets for {environment}:
               {"\n".join(['- ' + bucket for bucket in shared_buckets_data['buckets'].keys()])}
