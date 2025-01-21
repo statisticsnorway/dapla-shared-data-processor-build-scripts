@@ -1,10 +1,11 @@
 from asdf.schema import ValidationError, validate
+import os
 from rich.color import Color
 from rich.console import Console
 from rich.highlighter import Highlighter
 from rich.style import Style
-import os
 import sys
+import textwrap
 import yaml
 
 # Highlights all text in red
@@ -73,17 +74,18 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
         shared_buckets_data: object = yaml.safe_load(stream.read())
 
     if config_data['shared_bucket'] not in shared_buckets_data['buckets'].keys():
-        errorConsole.print(f"""
+        errorConsole.print(textwrap.dedent(
+            f"""
 
 
-        In the configuration file "{contextual_path}" in the field 'shared_bucket' the provided bucket {config_data['shared_bucket']} does not exist.
+            In the configuration file "{contextual_path}" in the field 'shared_bucket' the provided bucket {config_data['shared_bucket']} does not exist.
 
-        Existing shared buckets for {environment}:
+            Existing shared buckets for {environment}:
+              {"\n".join(['- ' + bucket for bucket in shared_buckets_data['buckets'].keys()])}
 
-          {"\n".join(['- ' + bucket for bucket in shared_buckets_data['buckets'].keys()])}
 
-
-        """)
+            """
+        ))
         sys.exit(1)
 
 
