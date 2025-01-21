@@ -72,12 +72,12 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
     with open(shared_buckets_path) as stream:
         shared_buckets_data: object = yaml.safe_load(stream.read())
 
-    if config_data.shared_bucket not in shared_buckets_data['buckets'].keys():
+    if config_data['shared_bucket'] not in shared_buckets_data['buckets'].keys():
         errorConsole.print(f"""
 
 
         In the configuration file {contextual_path}/config.yaml in the field 'shared_bucket' the provided bucket
-        {config_data.shared_bucket} does not exist.
+        {config_data['shared_bucket']} does not exist.
 
         Existing shared buckets for {environment}: {list(shared_buckets_data['buckets'].keys())}
 
