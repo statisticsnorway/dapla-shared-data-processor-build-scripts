@@ -82,7 +82,10 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
         ))
         sys.exit(1)
 
-    if 'output_columns' in config_data and (diff := set(config_data['pseudo']) - set(config_data['output_columns'])) > 0:
+    pseudo_targeted_columns: set[list[str]] = set(
+        [column for task in config_data['pseudo'] for column in task['columns']]
+    )
+    if 'output_columns' in config_data and (diff := pseudo_targeted_columns - set(config_data['output_columns'])) > 0:
         errorConsole.print(textwrap.dedent(
             f"""
 
@@ -90,7 +93,7 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
             In the configuration file "{contextual_path}" in the field "output_columns" not all columns
             targeted by pseudo operations are listed in the "output_columns".
 
-            The columns that are missing are:
+            The missing columns are:
               {"\n".join(['- ' + column for column in diff])}
 
 
