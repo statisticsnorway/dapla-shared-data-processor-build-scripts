@@ -82,10 +82,10 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
         ))
         sys.exit(1)
 
-    pseudo_targeted_columns: set[list[str]] = set(
+    pseudo_targeted_columns: set[str] = set(
         [column for task in config_data['pseudo'] for column in task['columns']]
     )
-    if 'output_columns' in config_data and (diff := pseudo_targeted_columns - set(config_data['output_columns'])) > 0:
+    if 'output_columns' in config_data and len(diff := pseudo_targeted_columns - set(config_data['output_columns'])) > 0:
         errorConsole.print(textwrap.dedent(
             f"""
 
