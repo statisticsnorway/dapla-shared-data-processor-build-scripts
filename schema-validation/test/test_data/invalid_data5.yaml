@@ -1,8 +1,9 @@
 shared_bucket: "ssb-play-obr-data-delt-ledstill-prod"
 source_folder: "ledstill"
 destination_folder: ""
-memory_size: 3
-output_columns: [ "fnr", "snr", "fornavn", "etternavn" ]
+memory_size: 2
+# Can't have zero output columns
+output_columns: [  ]
 pseudo:
   - task_one:
     columns: [ "fnr" ]

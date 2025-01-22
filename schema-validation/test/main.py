@@ -19,7 +19,7 @@ def test_invalid_delomaten_config():
     with open('./config_schema.yaml') as stream:
         config_schema = yaml.safe_load(stream.read())
 
-    for i in range(1, 5):
+    for i in range(1, 6):
         filepath = f'./test/test_data/invalid_data{i}.yaml'
         with open(filepath) as stream:
           data = yaml.safe_load(stream.read())

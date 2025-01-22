@@ -4,6 +4,7 @@ destination_folder: "some/folder"
 memory_size: 3
 pseudo:
   - task_one:
+    # Pseudo operation can't target zero columns
     columns: [  ]
     pseudo_operation: "DEPSEUDO"
     encryption_algorithm: "papis_compatible"

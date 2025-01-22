@@ -26,20 +26,29 @@ properties:
       The folder prefix inside the teams' product bucket from which
       to fetch the files
     type: string
-    pattern: "^([a-za-z0-9])[/a-za-z0-9]+[a-za-z0-9]$"
+    pattern: "(^([a-zA-Z0-9])[/a-zA-Z0-9]+[a-zA-Z0-9]$|^[a-zA-Z]*$)"
 
   destination_folder:
     description: |
       The folder prefix inside the shared bucket from which
       to write the processed files to
     type: string
-    pattern: "^([a-zA-Z0-9])[/a-zA-Z0-9]+[a-za-z0-9]$"
+    pattern: "(^([a-zA-Z0-9])[/a-zA-Z0-9]+[a-zA-Z0-9]$|^[a-zA-Z]*$)"
 
   memory_size:
     description: |
       The amount of memory in GiB given to the data automation processor instance
     type: integer
     minimum: 1
+
+  output_columns:
+    description: |
+      The columns to be outputted when writing the result to the shared bucket.
+      If 'output_columns' isn't specified all columns are outputted.
+    type: array
+    minItems: 1
+    items:
+      type: string
 
   pseudo:
     description: |
