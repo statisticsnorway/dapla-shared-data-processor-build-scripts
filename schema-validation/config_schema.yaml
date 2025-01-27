@@ -58,10 +58,18 @@ properties:
     items:
       type: object
       required:
+        - name
         - columns
         - pseudo_operation
         - encryption_algorithm
+
       properties:
+        name:
+          description: |
+            A name describing the pseudo task
+          type: string
+          minLength: 3
+
         columns:
           description: |
             Which columns in the dataframe to target

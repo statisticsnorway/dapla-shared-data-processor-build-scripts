@@ -1,4 +1,5 @@
-from asdf.schema import ValidationError, validate
+from asdf.schema import ValidationError, validate # type: ignore
+from delomaten_schema_validation import PseudoTask, pseudo_task_columns_uniquely_targeted
 import pytest
 import yaml
 
@@ -28,3 +29,12 @@ def test_invalid_delomaten_config():
             pytest.fail(f'Validation of {filepath} passed, but was expected to fail.')
         except ValidationError:
             assert True
+
+def test_pseudo_task_columns_uniquely_targeted():
+    with open('./test/test_data/invalid_pseudo_tasks.yaml') as stream:
+        pseudo_tasks: list[PseudoTask] = (
+          [PseudoTask(**task) for task in yaml.safe_load(stream.read())]
+        )
+
+    with pytest.raises(SystemExit):
+        pseudo_task_columns_uniquely_targeted(pseudo_tasks)

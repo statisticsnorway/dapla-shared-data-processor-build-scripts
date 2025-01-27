@@ -14,7 +14,7 @@
         devShells.default = pkgs.mkShell {
           name = "dev shell";
           packages = with pkgs; [
-            python313
+            python312
             ruff-lsp
             uv
             yaml-language-server
