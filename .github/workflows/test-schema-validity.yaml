@@ -31,14 +31,20 @@ jobs:
       - name: Install python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.12'
+      - name: Type check python code
+        shell: bash
+        run: |
+          cd schema-validation
+          uv run mypy src test --check-untyped-defs
       # Test that the schema itself is valid
       - name: Run schema meta tests
         shell: bash
         run: |
+          cd schema-validation
           uv run pytest -v
       - name: Run schema unit tests
         shell: bash
         run: |
-          cd scripts
+          cd schema-validation
           uv run pytest -v test/main.py
