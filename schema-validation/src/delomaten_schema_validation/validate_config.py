@@ -85,9 +85,6 @@ def validate_config(environment: str, folder: str, directory_path: str, shared_b
         errorConsole.print(f'\n\nThe given shared-buckets path "{shared_buckets_path}" does not exist')
         sys.exit(1)
 
-    # with open(config_data_path) as stream:
-    #     config_data: dict[str, str | list[str] | list[dict[str, str | list[str]]]] = yaml.safe_load(stream.read())
-
     config_data = load_delomaten_config(config_data_path)
 
     with open('./config_schema.yaml') as stream:
