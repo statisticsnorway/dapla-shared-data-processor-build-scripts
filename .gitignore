@@ -172,3 +172,8 @@ cython_debug/
 
 .direnv/
 .envrc
+
+**/.bloop
+**/.bsp
+**/.metals
+**/.scala-build

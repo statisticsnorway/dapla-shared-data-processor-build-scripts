@@ -18,6 +18,9 @@
             ruff-lsp
             uv
             yaml-language-server
+
+            scala-cli
+            metals
           ];
         };
       };

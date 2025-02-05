@@ -1,0 +1,9 @@
+- name: task_one
+  columns: [ "fnr", "snr" ]
+  pseudo_operation: "DEPSEUDO"
+  encryption_algorithm: "papis_compatible"
+- name: task_two
+  columns: [ "fnr", "snr" ]
+  pseudo_operation: "PSEUDO"
+  encryption_algorithm: "sid_mapping"
+  encryption_args: [ "2024-03-27" ]
