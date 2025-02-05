@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   run-delomaten-schema-tests:
-    name: Run tests
+    name: Run schema validity tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
