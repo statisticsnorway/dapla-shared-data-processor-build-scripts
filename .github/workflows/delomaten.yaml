@@ -204,7 +204,7 @@ jobs:
           IFS=',' read -r FOLDER_NAME ENV_NAME <<< "$MATRIX"
           echo "Running test for source: $FOLDER_NAME-$ENV_NAME"
 
-          set -xe
+          set -xeo pipefail
 
           export CONFIG_FILE_PATH="$GITHUB_WORKSPACE/automation/shared-data/$ENV_NAME/$FOLDER_NAME"
           export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$ENV_NAME/iam.yaml"
@@ -212,7 +212,7 @@ jobs:
 
           echo -e "\e[31mThis should be red\e[0m"
 
-          scala-cli run validateConfig.scala -color always -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" 2>&1 | grep -v "Download|Check"
+          scala-cli run validateConfig.scala -color always -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" | grep -v "Download|Check" | cat -v
 
 #   plan:
 #     if: ${{ github.event_name == 'pull_request' }}
