@@ -210,8 +210,9 @@ jobs:
           export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$ENV_NAME/iam.yaml"
           cd dapla-shared-data-processor-build-scripts/schema-validation-sc
 
-          scala-cli run validateConfig.scala -color always -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" | grep -v "Download"
+          echo -e "\e[31mThis should be red\e[0m"
 
+          scala-cli run validateConfig.scala -color always -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" 2>&1 | grep -v "Download|Check"
 
 #   plan:
 #     if: ${{ github.event_name == 'pull_request' }}
