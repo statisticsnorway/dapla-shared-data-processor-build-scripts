@@ -36,4 +36,6 @@ jobs:
             exit 1
           )
       - name: Run tests
-        run: scala-cli test .
+        run: |
+          cd schema-validation-sc
+          scala-cli test test/
