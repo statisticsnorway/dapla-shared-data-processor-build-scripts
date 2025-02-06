@@ -109,6 +109,8 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
   println(s"Single line with templating ${1 + 1}".red.newlines)
   println("""Multiline string on one line no work?""".red)
+  println("""Multiline string which starts first line works?
+  Now we're on the second line""".red)
   println("""
   Line one:
     Multiline string on more then one line color no work?
