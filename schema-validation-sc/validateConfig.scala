@@ -26,8 +26,8 @@ import scala.collection.immutable.*
 
 // Helper extensions for String type
 extension (str: String)
-  def red = s"${Console.RED}$str"
-  def green = s"${Console.GREEN}$str"
+  def red = s"\u001b[31m$str\u001b[0m"
+  def green = s"\u001b[32m$str\u001b[0m"
   def space = s"\n\n$str\n\n"
 
 enum PseudoOperation:
@@ -107,7 +107,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
     sharedBucketsPath: String
 ): Unit =
   if !Files.exists(Paths.get(directoryPath)) then
-    Console.println(
+    println(
       s"The given directory path ${directoryPath} does not exist".space.red
     )
     System.exit(1)
@@ -116,13 +116,13 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
   if !Files.exists(configDataPath) then
     val context = Paths.get(environment, folder).toString()
-    Console.println(
+    println(
       s"No 'config.yaml' file exists in the product source folder '${context}'".space.red
     )
     System.exit(1)
 
   if !Files.exists(Paths.get(sharedBucketsPath)) then
-    Console.println(
+    println(
       s"The given shared-buckets path '${sharedBucketsPath}' does not exist".space.red
     )
     System.exit(1)
@@ -130,7 +130,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
   validateConfigSchema(configDataPath) match
     case Left(errMessages) =>
       val contextualPath = Paths.get(environment, folder, "config.yaml")
-      Console.println(
+      println(
         s"The delomaten configuration file '${contextualPath}' is invalid:\n\n${errMessages.mkString("\n")}".space.red
       )
     case Right(_) => ()
@@ -140,7 +140,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
   // If the shared bucket specified in the config.yaml doesn't exist in the dapla team, report an error
   if !sharedBuckets.buckets.keys.toSet.contains(delomaten.sharedBucket) then
-    Console.println(s"""
+    println(s"""
       In the configuration file "${configDataPath}" in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
 
       Existing shared buckets for ${environment}:
@@ -154,7 +154,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
   delomaten.outputColumns match
     case Some(columns) if (pseudoTargetedColumns &~ columns.toSet).size > 0 =>
       val diff = pseudoTargetedColumns &~ columns.toSet
-      Console.println(s"""
+      println(s"""
           In the configuration file '${configDataPath}' in the field 'output_columns'
           not all columns targeted by pseudo operations are listed in the 'output_columns'.
 
@@ -166,7 +166,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
   pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
 
-  Console.println(
+  println(
     s"The '${configDataPath}' configuration was successfully validated!".space.green
   )
 
@@ -180,7 +180,7 @@ def pseudoTaskColumnsUniquelyTargeted(pseudoTasks: List[PseudoTask]): Unit =
     for (taskNameB, targetedColumnsB) <- remainingMap do
       val overlappingColumns = Set(targetedColumns) & Set(targetedColumnsB)
       if overlappingColumns.size > 0 then
-        Console.println(
+        println(
           s"""
             The pseudo tasks '${taskName}' and '${taskNameB}' target overlapping columns.
 
