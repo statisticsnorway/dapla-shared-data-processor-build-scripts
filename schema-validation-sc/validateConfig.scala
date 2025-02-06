@@ -107,15 +107,21 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
     sharedBucketsPath: String
 ): Unit =
 
-  println("\u001b[31mThis text is read literal ascii\u001b[0m")
-  println(s"${Console.RED}This text is red, using Console.RED then newlines".newlines)
-  println("This text is red, using .red method then newlines".red.newlines)
-  println("This text is green, using .green method then newlines".green.newlines)
+  println(s"Single line with templating ${1 + 1}".red.newlines)
+
+  println("""
+    In the configuration file '${1 + 1}' in the field 'output_columns'
+    not all columns targeted by pseudo operations are listed in the 'output_columns'.
+
+    The missing columns are: (WITHOUT TEMPLATING)
+      - ${1 + 3}
+  """.red)
+
   println(s"""
     In the configuration file '${1 + 1}' in the field 'output_columns'
     not all columns targeted by pseudo operations are listed in the 'output_columns'.
 
-    The missing columns are: (WITHOUT NEWLINES OR STRIPPING)
+    The missing columns are: (WITHOUT NEWLINES or STRIPPING)
       - ${1 + 3}
   """.red)
   println(s"""
@@ -125,11 +131,11 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
     The missing columns are: (WITH NEWLINES and WITHOUT STRIPPING)
       - ${1 + 3}
   """.red.newlines)
-  println(s"""
+  println("""
     |In the configuration file '${1 + 1}' in the field 'output_columns'
     |not all columns targeted by pseudo operations are listed in the 'output_columns'.
 
-    |The missing columns are: (WITH STRIPPING and NEWLINES)
+    |The missing columns are: (WITH STRIPPING and NEWLINES, but WITHOUT TEMPLATING)
     |  - ${1 + 3}
   """.stripMargin.red.newlines)
 
