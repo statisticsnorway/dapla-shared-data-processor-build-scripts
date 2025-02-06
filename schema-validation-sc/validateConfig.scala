@@ -108,6 +108,12 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 ): Unit =
 
   println(s"Single line with templating ${1 + 1}".red.newlines)
+  println("""Multiline string on one line no work?""".red)
+  println("""
+  Line one:
+    Multiline string on more then one line color no work?
+
+  """.red)
 
   println("""
     In the configuration file '${1 + 1}' in the field 'output_columns'
