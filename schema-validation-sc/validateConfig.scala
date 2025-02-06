@@ -106,6 +106,10 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
     directoryPath: String,
     sharedBucketsPath: String
 ): Unit =
+
+  println("\u001b[31mThis text is read literal ascii\u001b[0m")
+  println("This text is red, using .red method".red)
+
   if !Files.exists(Paths.get(directoryPath)) then
     println(
       s"The given directory path ${directoryPath} does not exist".space.red
