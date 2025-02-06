@@ -28,7 +28,7 @@ import scala.collection.immutable.*
 extension (str: String)
   def red = s"\u001b[31m$str\u001b[0m"
   def green = s"\u001b[32m$str\u001b[0m"
-  def space = s"\n\n$str\n\n"
+  def newlines = s"\n\n$str\n\n"
 
 enum PseudoOperation:
   case Pseudo, Depseudo, Redact
@@ -109,12 +109,12 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
   println("\u001b[31mThis text is read literal ascii\u001b[0m")
   println("This text is red, using .red method".red)
-  println("This text is red, using newlines then .red".space.red)
-  println("This text is green, using .green method then newlines".green.space)
+  println(s"${Console.RED}This text is red, using Console.RED then newlines".newlines)
+  println("This text is green, using .green method then newlines".green.newlines)
 
   if !Files.exists(Paths.get(directoryPath)) then
     println(
-      s"The given directory path ${directoryPath} does not exist".space.red
+      s"The given directory path ${directoryPath} does not exist".red.newlines
     )
     System.exit(1)
 
@@ -123,13 +123,13 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
   if !Files.exists(configDataPath) then
     val context = Paths.get(environment, folder).toString()
     println(
-      s"No 'config.yaml' file exists in the product source folder '${context}'".space.red
+      s"No 'config.yaml' file exists in the product source folder '${context}'".red.newlines
     )
     System.exit(1)
 
   if !Files.exists(Paths.get(sharedBucketsPath)) then
     println(
-      s"The given shared-buckets path '${sharedBucketsPath}' does not exist".space.red
+      s"The given shared-buckets path '${sharedBucketsPath}' does not exist".red.newlines
     )
     System.exit(1)
 
@@ -137,7 +137,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
     case Left(errMessages) =>
       val contextualPath = Paths.get(environment, folder, "config.yaml")
       println(
-        s"The delomaten configuration file '${contextualPath}' is invalid:\n\n${errMessages.mkString("\n")}".space.red
+        s"The delomaten configuration file '${contextualPath}' is invalid:\n\n${errMessages.mkString("\n")}".red.newlines
       )
     case Right(_) => ()
 
@@ -151,7 +151,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
       |Existing shared buckets for ${environment}:
       |  ${sharedBuckets.buckets.keys.map("- " + _).mkString("\n")}
-    """.stripMargin.space.red)
+    """.stripMargin.red.newlines)
     System.exit(1)
 
   val pseudoTargetedColumns: Set[String] =
@@ -166,14 +166,14 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
           |The missing columns are:
           |  ${diff.map("- " + _).mkString("\n")}
-        """.stripMargin.space.red)
+        """.stripMargin.red.newlines)
       System.exit(1)
     case _ => ()
 
   pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
 
   println(
-    s"The '${configDataPath}' configuration was successfully validated!".space.green
+    s"The '${configDataPath}' configuration was successfully validated!".green.newlines
   )
 
 // Ensure that the pseudo task columns are only targeted once.
@@ -192,7 +192,7 @@ def pseudoTaskColumnsUniquelyTargeted(pseudoTasks: List[PseudoTask]): Unit =
 
             |Overlapping columns:
             |  ${overlappingColumns.map("- " + _).mkString("\n")}
-          """.stripMargin.space.red
+          """.stripMargin.red.newlines
         )
         System.exit(1)
 
