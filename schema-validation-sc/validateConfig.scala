@@ -107,46 +107,6 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
     sharedBucketsPath: String
 ): Unit =
 
-  println(s"Single line with templating ${1 + 1}".red.newlines)
-  println("""Multiline string on one line no work?""".red)
-  println("""Multiline string which starts first line works?
-  Now we're on the second line""".green)
-  println("""
-  Line one:
-    Multiline string on more then one line color no work?
-
-  """.red)
-
-  println("""
-    In the configuration file '${1 + 1}' in the field 'output_columns'
-    not all columns targeted by pseudo operations are listed in the 'output_columns'.
-
-    The missing columns are: (WITHOUT TEMPLATING)
-      - ${1 + 3}
-  """.green)
-
-  println(s"""
-    In the configuration file '${1 + 1}' in the field 'output_columns'
-    not all columns targeted by pseudo operations are listed in the 'output_columns'.
-
-    The missing columns are: (WITHOUT NEWLINES or STRIPPING)
-      - ${1 + 3}
-  """.red)
-  println(s"""
-    In the configuration file '${1 + 1}' in the field 'output_columns'
-    not all columns targeted by pseudo operations are listed in the 'output_columns'.
-
-    The missing columns are: (WITH NEWLINES and WITHOUT STRIPPING)
-      - ${1 + 3}
-  """.red.newlines)
-  println("""
-    |In the configuration file '${1 + 1}' in the field 'output_columns'
-    |not all columns targeted by pseudo operations are listed in the 'output_columns'.
-
-    |The missing columns are: (WITH STRIPPING and NEWLINES, but WITHOUT TEMPLATING)
-    |  - ${1 + 3}
-  """.stripMargin.green.newlines)
-
   if !Files.exists(Paths.get(directoryPath)) then
     println(
       s"The given directory path ${directoryPath} does not exist".red.newlines
