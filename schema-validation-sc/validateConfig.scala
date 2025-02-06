@@ -109,6 +109,8 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
   println("\u001b[31mThis text is read literal ascii\u001b[0m")
   println("This text is red, using .red method".red)
+  println("This text is red, using newlines then .red".space.red)
+  println("This text is green, using .green method then newlines".green.space)
 
   if !Files.exists(Paths.get(directoryPath)) then
     println(
