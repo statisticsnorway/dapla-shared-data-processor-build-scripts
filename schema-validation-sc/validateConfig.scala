@@ -112,10 +112,24 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
   println("This text is red, using .red method then newlines".red.newlines)
   println("This text is green, using .green method then newlines".green.newlines)
   println(s"""
+    In the configuration file '${1 + 1}' in the field 'output_columns'
+    not all columns targeted by pseudo operations are listed in the 'output_columns'.
+
+    The missing columns are: (WITHOUT NEWLINES OR STRIPPING)
+      - ${1 + 3}
+  """.red)
+  println(s"""
+    In the configuration file '${1 + 1}' in the field 'output_columns'
+    not all columns targeted by pseudo operations are listed in the 'output_columns'.
+
+    The missing columns are: (WITH NEWLINES and WITHOUT STRIPPING)
+      - ${1 + 3}
+  """.red.newlines)
+  println(s"""
     |In the configuration file '${1 + 1}' in the field 'output_columns'
     |not all columns targeted by pseudo operations are listed in the 'output_columns'.
 
-    |The missing columns are:
+    |The missing columns are: (WITH STRIPPING and NEWLINES)
     |  - ${1 + 3}
   """.stripMargin.red.newlines)
 
