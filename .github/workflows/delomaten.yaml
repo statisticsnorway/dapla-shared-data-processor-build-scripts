@@ -212,7 +212,9 @@ jobs:
 
           echo -e "\e[31mThis should be red\e[0m"
 
-          echo "$(scala-cli run validateConfig.scala -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" | grep -v "Download" | cat -v)"
+          scala-cli run red.scala
+
+          scala-cli run validateConfig.scala -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" | grep -v "Download"
 
 #   plan:
 #     if: ${{ github.event_name == 'pull_request' }}
