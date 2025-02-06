@@ -26,8 +26,8 @@ import scala.collection.immutable.*
 
 // Helper extensions for String type
 extension (str: String)
-  def red = s"\u001b[31m$str\u001b[0m"
-  def green = s"\u001b[32m$str\u001b[0m"
+  def red = s"${Console.RED}$str"
+  def green = s"${Console.GREEN}$str"
   def newlines = s"\n\n$str\n\n"
 
 enum PseudoOperation:
@@ -108,9 +108,16 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 ): Unit =
 
   println("\u001b[31mThis text is read literal ascii\u001b[0m")
-  println("This text is red, using .red method".red)
   println(s"${Console.RED}This text is red, using Console.RED then newlines".newlines)
+  println("This text is red, using .red method then newlines".red.newlines)
   println("This text is green, using .green method then newlines".green.newlines)
+  println(s"""
+    |In the configuration file '${1 + 1}' in the field 'output_columns'
+    |not all columns targeted by pseudo operations are listed in the 'output_columns'.
+
+    |The missing columns are:
+    |  - ${1 + 3}
+  """.stripMargin.red.newlines)
 
   if !Files.exists(Paths.get(directoryPath)) then
     println(
