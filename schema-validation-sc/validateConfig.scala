@@ -141,11 +141,11 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
   // If the shared bucket specified in the config.yaml doesn't exist in the dapla team, report an error
   if !sharedBuckets.buckets.keys.toSet.contains(delomaten.sharedBucket) then
     println(s"""
-      In the configuration file "${configDataPath}" in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
+      |In the configuration file "${configDataPath}" in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
 
-      Existing shared buckets for ${environment}:
-        ${sharedBuckets.buckets.keys.map("- " + _).mkString("\n")}
-    """)
+      |Existing shared buckets for ${environment}:
+      |  ${sharedBuckets.buckets.keys.map("- " + _).mkString("\n")}
+    """.stripMargin.space.red)
     System.exit(1)
 
   val pseudoTargetedColumns: Set[String] =
@@ -155,12 +155,12 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
     case Some(columns) if (pseudoTargetedColumns &~ columns.toSet).size > 0 =>
       val diff = pseudoTargetedColumns &~ columns.toSet
       println(s"""
-          In the configuration file '${configDataPath}' in the field 'output_columns'
-          not all columns targeted by pseudo operations are listed in the 'output_columns'.
+          |In the configuration file '${configDataPath}' in the field 'output_columns'
+          |not all columns targeted by pseudo operations are listed in the 'output_columns'.
 
-          The missing columns are:
-            ${diff.map("- " + _).mkString("\n")}
-        """.space.red)
+          |The missing columns are:
+          |  ${diff.map("- " + _).mkString("\n")}
+        """.stripMargin.space.red)
       System.exit(1)
     case _ => ()
 
@@ -182,11 +182,11 @@ def pseudoTaskColumnsUniquelyTargeted(pseudoTasks: List[PseudoTask]): Unit =
       if overlappingColumns.size > 0 then
         println(
           s"""
-            The pseudo tasks '${taskName}' and '${taskNameB}' target overlapping columns.
+            |The pseudo tasks '${taskName}' and '${taskNameB}' target overlapping columns.
 
-            Overlapping columns:
-              ${overlappingColumns.map("- " + _).mkString("\n")}
-          """
+            |Overlapping columns:
+            |  ${overlappingColumns.map("- " + _).mkString("\n")}
+          """.stripMargin.space.red
         )
         System.exit(1)
 
