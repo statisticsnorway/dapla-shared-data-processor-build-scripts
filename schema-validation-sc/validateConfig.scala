@@ -26,8 +26,8 @@ import scala.collection.immutable.*
 
 // Helper extensions for String type
 extension (str: String)
-  def red = s"${Console.RED}$str"
-  def green = s"${Console.GREEN}$str"
+  def red = str.split("\n").map(Console.RED + _).mkString("\n")
+  def green = str.split("\n").map(Console.GREEN + _).mkString("\n")
   def newlines = s"\n\n$str\n\n"
 
 enum PseudoOperation:
@@ -110,7 +110,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
   println(s"Single line with templating ${1 + 1}".red.newlines)
   println("""Multiline string on one line no work?""".red)
   println("""Multiline string which starts first line works?
-  Now we're on the second line""".red)
+  Now we're on the second line""".green)
   println("""
   Line one:
     Multiline string on more then one line color no work?
@@ -123,7 +123,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
     The missing columns are: (WITHOUT TEMPLATING)
       - ${1 + 3}
-  """.red)
+  """.green)
 
   println(s"""
     In the configuration file '${1 + 1}' in the field 'output_columns'
@@ -145,7 +145,7 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
 
     |The missing columns are: (WITH STRIPPING and NEWLINES, but WITHOUT TEMPLATING)
     |  - ${1 + 3}
-  """.stripMargin.red.newlines)
+  """.stripMargin.green.newlines)
 
   if !Files.exists(Paths.get(directoryPath)) then
     println(
