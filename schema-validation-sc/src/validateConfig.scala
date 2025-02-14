@@ -77,7 +77,7 @@ import scala.jdk.CollectionConverters.*
     case Right(_) => ()
 
   val delomaten: DelomatenConfig = loadConfig(configDataPath)
-  val sharedBuckets: SharedBuckets = loadConfig(Paths.get(sharedBucketsPath))
+  val sharedBuckets: List[String] = loadConfig(Paths.get(sharedBucketsPath))
 
   // If the shared bucket specified in the config.yaml doesn't exist in the dapla team, report an error
   if !sharedBuckets.contains(delomaten.sharedBucket) then
@@ -85,7 +85,7 @@ import scala.jdk.CollectionConverters.*
       |In the configuration file "${configDataPath}" in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
 
       |Existing shared buckets for ${environment}:
-      |  ${sharedBuckets.map("- " + _).mkString("\n")}
+      |  ${sharedBuckets.map("- " + _).mkString("\n  ")}
     """.stripMargin.red.newlines)
     System.exit(1)
 

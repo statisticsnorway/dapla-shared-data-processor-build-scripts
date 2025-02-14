@@ -2,7 +2,7 @@ shared_bucket: "ssb-play-obr-data-delt-ledstill-prod"
 source_folder: "ledstill"
 destination_folder: "ledstill"
 memory_size: 3
-output_columns: [ "fnr", "snr", "fornavn", "etternavn", "bolig" ]
+output_columns: [ "fnr", "snr", "fornavn", "etternavn", "arbeidssted", "bolig" ]
 pseudo:
   - name: task_one
     columns: [ "fornavn", "etternavn" ]

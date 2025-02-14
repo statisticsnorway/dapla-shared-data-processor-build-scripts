@@ -53,7 +53,3 @@ case class DelomatenConfig(
 given Decoder[DelomatenConfig] = ConfiguredDecoder.derived(using
   Configuration.default.withSnakeCaseMemberNames
 )
-
-type SharedBuckets = List[String]
-
-given Decoder[SharedBuckets] = deriveDecoder
