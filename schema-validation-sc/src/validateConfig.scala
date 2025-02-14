@@ -14,7 +14,7 @@ import com.networknt.schema.serialization.JsonNodeReader
 import com.networknt.schema.SpecVersion.VersionFlag
 import com.networknt.schema.*
 import com.schemavalidation.types.{given, *}
-import com.schemavalidation.utils.loadConfig
+import com.schemavalidation.utils.*
 import io.circe.*
 import io.circe.syntax.*
 import io.circe.yaml
