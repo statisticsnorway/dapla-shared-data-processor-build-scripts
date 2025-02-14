@@ -102,6 +102,7 @@ properties:
             - "PSEUDO"
             - "DEPSEUDO"
             - "REPSEUDO"
+            #- "REDACT"
 
         encryption_algorithm:
           description: |
@@ -110,11 +111,15 @@ properties:
             - "default"
             - "papis_compatible"
             - "sid_mapping"
-            - "redact"
 
         encryption_args:
           description: |
             Any additional arguments to pass to the encryption algorithm
           type: array
           items:
-            type: string
+            type: object
+            properties:
+              sid_mapping_date:
+                type: string
+                format: date
+            additionalProperties: false

@@ -11,4 +11,5 @@ pseudo:
     columns: [ "snr" ]
     pseudo_operation: "PSEUDO"
     encryption_algorithm: "sid_mapping"
-    encryption_args: [ "2024-03-27" ]
+    encryption_args:
+      - sid_mapping_date: "2024-03-27"

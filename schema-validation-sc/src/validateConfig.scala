@@ -5,83 +5,23 @@
 //> using dep io.circe::circe-parser:0.14.10
 //> using dep com.networknt:json-schema-validator:1.5.5
 //> using dep ch.qos.logback:logback-classic:1.5.16
+//> using files types.scala utils.scala
 package validate
 
-import cats.syntax.all.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.networknt.schema.serialization.JsonNodeReader
 import com.networknt.schema.SpecVersion.VersionFlag
 import com.networknt.schema.*
+import com.schemavalidation.types.{given, *}
+import com.schemavalidation.utils.loadConfig
 import io.circe.*
-import io.circe.derivation.*
-import io.circe.generic.semiauto.*
 import io.circe.syntax.*
 import io.circe.yaml
-import io.circe.derivation.Configuration
 import java.nio.file.{Files, Path, Paths}
+import scala.collection.immutable.*
 import scala.io.Source
 import scala.jdk.CollectionConverters.*
-import scala.collection.immutable.*
-
-// Helper extensions for String type
-extension (str: String)
-  def red = str.split("\n").map(Console.RED + _).mkString("\n")
-  def green = str.split("\n").map(Console.GREEN + _).mkString("\n")
-  def newlines = s"\n\n$str\n\n"
-
-enum PseudoOperation:
-  case Pseudo, Depseudo, Redact
-
-given Decoder[PseudoOperation] = ConfiguredEnumDecoder.derive(_.toUpperCase)
-given Encoder[PseudoOperation] = ConfiguredEnumEncoder.derive(_.toUpperCase)
-
-enum EncryptionAlgorithm:
-  case PapisCompatible, SidMapping
-
-given Decoder[EncryptionAlgorithm] = ConfiguredEnumDecoder.derived(using
-  Configuration.default.withSnakeCaseConstructorNames
-)
-
-case class PseudoTask(
-    name: String,
-    columns: List[String],
-    pseudoOperation: PseudoOperation,
-    encryptionAlgorithm: EncryptionAlgorithm,
-    encryptionArgs: Option[List[String]]
-)
-given Decoder[PseudoTask] = ConfiguredDecoder.derived(using
-  Configuration.default.withSnakeCaseMemberNames
-)
-
-case class DelomatenConfig(
-    sharedBucket: String,
-    sourceFolder: String,
-    destinationFolder: String,
-    memorySize: Int,
-    pseudo: List[PseudoTask],
-    outputColumns: Option[List[String]]
-)
-given Decoder[DelomatenConfig] = ConfiguredDecoder.derived(using
-  Configuration.default.withSnakeCaseMemberNames
-)
-
-case class SharedBuckets(
-    buckets: HashMap[String, HashMap[String, List[String]]]
-)
-given Decoder[SharedBuckets] = deriveDecoder
-
-/** Load YAML configuration and decode it into scala type
-  */
-def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
-  val configData = Source.fromFile(path.toFile()).getLines().mkString("\n")
-
-  yaml.parser
-    .parse(configData)
-    .leftMap(err => err: Error)
-    .flatMap(_.as(decoder)) match
-    case Left(err)     => throw Exception(s"Error: ${err.getMessage()}")
-    case Right(config) => config
 
 /** Validate if the config.yaml under the @directory_path is valid. Only uses
   * \@environment and @folder arguments to print more informative logs.
@@ -140,12 +80,12 @@ def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
   val sharedBuckets: SharedBuckets = loadConfig(Paths.get(sharedBucketsPath))
 
   // If the shared bucket specified in the config.yaml doesn't exist in the dapla team, report an error
-  if !sharedBuckets.buckets.keys.toSet.contains(delomaten.sharedBucket) then
+  if !sharedBuckets.contains(delomaten.sharedBucket) then
     println(s"""
       |In the configuration file "${configDataPath}" in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
 
       |Existing shared buckets for ${environment}:
-      |  ${sharedBuckets.buckets.keys.map("- " + _).mkString("\n")}
+      |  ${sharedBuckets.map("- " + _).mkString("\n")}
     """.stripMargin.red.newlines)
     System.exit(1)
 

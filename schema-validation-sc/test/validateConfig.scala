@@ -58,10 +58,12 @@ class SchemaValidationTests extends munit.FunSuite:
     assertEquals(messages.size, 0)
   }
 
-  test("Is valid_data.yaml a valid configuration?") {
-    val messages =
-      validateYaml(SchemaType.Config("./test/test_data/valid_data.yaml"))
-    assertEquals(messages.size, 0)
+  test("Valid yaml configurations pass the tests") {
+    (1 to 2).foreach { i =>
+      val messages =
+        validateYaml(SchemaType.Config(s"./test/test_data/valid_data$i.yaml"))
+      assert(clue(messages.size) == clue(0))
+    }
   }
 
   test("Invalid yaml configurations fail the tests") {
