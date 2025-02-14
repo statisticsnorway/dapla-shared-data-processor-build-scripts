@@ -334,7 +334,7 @@ jobs:
           IFS=',' read -r FOLDER_NAME PROJECT_NAME <<< "$MATRIX"
           cd dapla-shared-data-processor-build-scripts/schema-validation-sc
 
-          scala-cli run -q src/generateCode.scala -- "automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
+          scala-cli run -q src/generateCode.scala -- "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
 
           cat process_shared_data.py
       - name: Build and push image for ${{ matrix.source }}
