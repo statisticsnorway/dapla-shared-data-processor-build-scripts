@@ -210,129 +210,144 @@ jobs:
           export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$ENV_NAME/buckets-shared.yaml"
           cd dapla-shared-data-processor-build-scripts/schema-validation-sc
 
-          scala-cli run -q src/validateConfig.scala -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" 2>&1
+          scala-cli run -q src/validateConfig.scala -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
 
+  plan:
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: [test]
+    name: Plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ready comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.issue.owner,
+              repo: context.issue.repo,
+              issue_number: context.issue.number,
+              body: 'Auto-apply is ready, approve PR to start'
+            })
 
+  checks:
+    if: ${{ github.event_name == 'pull_request_review' &&
+      github.event.review.state == 'approved' }}
+    needs: [test]
+    name: Check preconditions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is mergeable
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            if (!pr.mergeable) {
+              core.setFailed("PR needs to be approved and mergeable");
+            }
 
-#   plan:
-#     if: ${{ github.event_name == 'pull_request' }}
-#     needs: [test]
-#     name: Plan
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Ready comment
-#         uses: actions/github-script@v6
-#         with:
-#           script: |
-#             github.rest.issues.createComment({
-#               owner: context.issue.owner,
-#               repo: context.issue.repo,
-#               issue_number: context.issue.number,
-#               body: 'Auto-apply is ready, approve PR to start'
-#             })
-#
-#   checks:
-#     if: ${{ github.event_name == 'pull_request_review' &&
-#       github.event.review.state == 'approved' }}
-#     needs: [test]
-#     name: Check preconditions
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Check if PR is mergeable
-#         uses: actions/github-script@v6
-#         with:
-#           script: |
-#             const { data: pr } = await github.rest.pulls.get({
-#               owner: context.repo.owner,
-#               repo: context.repo.repo,
-#               pull_number: context.issue.number,
-#             });
-#             if (!pr.mergeable) {
-#               core.setFailed("PR needs to be approved and mergeable");
-#             }
-#
-#   atlantis_auto_apply:
-#     needs: [checks]
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v4
-#
-#       - name: Wait for plan
-#         uses: statisticsnorway/dapla-source-data-processor-build-scripts/.github/actions/wait-for-status@main
-#         with:
-#           timeout: 300
-#           sleep_time: 5
-#           initial_sleep: 10
-#           statuses: |
-#             atlantis/plan
-#
-#       - name: Apply
-#         uses: actions/github-script@v6
-#         with:
-#           script: |
-#             github.rest.issues.createComment({
-#               owner: context.issue.owner,
-#               repo: context.issue.repo,
-#               issue_number: context.issue.number,
-#               body: 'atlantis apply'
-#             })
-#
-#       - name: Wait for apply
-#         uses: statisticsnorway/dapla-source-data-processor-build-scripts/.github/actions/wait-for-status@main
-#         with:
-#           timeout: 300
-#           sleep_time: 5
-#           initial_sleep: 10
-#           fail_on_destroy: false
-#           statuses: |
-#             atlantis/apply
-#
-#   build_and_push:
-#     if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.fetch_sources.outputs.all_sources_deleted != 'true' && needs.fetch_sources.outputs.matrix != '[]' }}
-#     needs: [ fetch_sources ]
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         source: ${{fromJson(needs.fetch_sources.outputs.matrix)}}
-#
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v4
-#       - id: "auth"
-#         name: "Authenticate to Google Cloud"
-#         uses: "google-github-actions/auth@v2"
-#         with:
-#           workload_identity_provider: ${{ needs.fetch_sources.outputs.workload_identity_provider }}
-#           service_account: ${{ needs.fetch_sources.outputs.service_account }}
-#           token_format: "access_token"
-#       - name: Login to base registry
-#         uses: docker/login-action@v2
-#         with:
-#           registry: ${{ needs.fetch_sources.outputs.base_registry }}
-#           username: "oauth2accesstoken"
-#           password: "${{ steps.auth.outputs.access_token }}"
-#       - name: Pull base image
-#         run: docker pull ${{ needs.fetch_sources.outputs.base_registry }}/base-image:${{ needs.fetch_sources.outputs.base_image_version }}
-#       - name: Login to team registry
-#         uses: docker/login-action@v2
-#         with:
-#           registry: ${{ needs.fetch_sources.outputs.team_registry }}
-#           username: "oauth2accesstoken"
-#           password: "${{ steps.auth.outputs.access_token }}"
-#       - name: Build and push image for ${{ matrix.source }}
-#         run: |
-#           MATRIX=${{ matrix.source }}
-#           IFS=',' read -r SOURCE_NAME PROJECT_NAME <<< "$MATRIX"
-#           echo "Building image for source: $SOURCE_NAME-$PROJECT_NAME"
-#           echo "FROM ${{ needs.fetch_sources.outputs.base_registry }}/base-image:${{ needs.fetch_sources.outputs.base_image_version }}" > Dockerfile
-#           echo "COPY automation/source-data/$PROJECT_NAME/$SOURCE_NAME/. ./plugins" >> Dockerfile
-#
-#           # A common case for Python folders is to use underscore as a separator. This is not allowed in GCP service accounts.
-#           SOURCE_NAME=$(echo "$SOURCE_NAME" | tr '_' '-')
-#           docker build . -t ${{ needs.fetch_sources.outputs.team_registry }}/$SOURCE_NAME:$PROJECT_NAME
-#           docker push ${{ needs.fetch_sources.outputs.team_registry }}/$SOURCE_NAME:$PROJECT_NAME
-#
+  atlantis_auto_apply:
+    needs: [checks]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Wait for plan
+        uses: statisticsnorway/dapla-source-data-processor-build-scripts/.github/actions/wait-for-status@add-gha-for-delomaten
+        with:
+          timeout: 300
+          sleep_time: 5
+          initial_sleep: 10
+          statuses: |
+            atlantis/plan
+
+      - name: Apply
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.issue.owner,
+              repo: context.issue.repo,
+              issue_number: context.issue.number,
+              body: 'atlantis apply'
+            })
+
+      - name: Wait for apply
+        uses: statisticsnorway/dapla-source-data-processor-build-scripts/.github/actions/wait-for-status@add-gha-for-delomaten
+        with:
+          timeout: 300
+          sleep_time: 5
+          initial_sleep: 10
+          fail_on_destroy: false
+          statuses: |
+            atlantis/apply
+
+  build_and_push:
+    if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.fetch_sources.outputs.all_sources_deleted != 'true' && needs.fetch_sources.outputs.matrix != '[]' }}
+    needs: [ fetch_sources ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        source: ${{fromJson(needs.fetch_sources.outputs.matrix)}}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v2"
+        with:
+          workload_identity_provider: ${{ needs.fetch_sources.outputs.workload_identity_provider }}
+          service_account: ${{ needs.fetch_sources.outputs.service_account }}
+          token_format: "access_token"
+      - name: Login to base registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ needs.fetch_sources.outputs.base_registry }}
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
+      - name: Pull base image
+        run: docker pull ${{ needs.fetch_sources.outputs.base_registry }}/base-image:${{ needs.fetch_sources.outputs.base_image_version }}
+      - name: Login to team registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ needs.fetch_sources.outputs.team_registry }}
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
+      - name: Setup caching
+        uses: coursier/cache-action@v6.4
+      - name: Setup Scala CLI
+        uses: VirtusLab/scala-cli-setup@v1.5
+      - name: Clone test scripts
+        if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
+        run: |
+          git clone -b add-gha-for-delomaten https://github.com/statisticsnorway/dapla-shared-data-processor-build-scripts
+      - name: Build python script for ${{ matrix.source }}
+        run: |
+          MATRIX=${{ matrix.source }}
+          IFS=',' read -r SOURCE_NAME PROJECT_NAME <<< "$MATRIX"
+          cd dapla-shared-data-processor-build-scripts/schema-validation-sc
+
+          scala-cli run -q src/generateConfig.scala -- "automation/shared-data/$PROJECT_NAME/$SOURCE_NAME/config.yaml"
+
+          cat process_shared_data.py
+      - name: Build and push image for ${{ matrix.source }}
+        run: |
+          MATRIX=${{ matrix.source }}
+          IFS=',' read -r SOURCE_NAME PROJECT_NAME <<< "$MATRIX"
+          echo "Building image for source: $SOURCE_NAME-$PROJECT_NAME"
+          echo "FROM ${{ needs.fetch_sources.outputs.base_registry }}/base-image:${{ needs.fetch_sources.outputs.base_image_version }}" > Dockerfile
+          echo "COPY automation/source-data/$PROJECT_NAME/$SOURCE_NAME/. ./plugins" >> Dockerfile
+
+          # A common case for Python folders is to use underscore as a separator. This is not allowed in GCP service accounts.
+          SOURCE_NAME=$(echo "$SOURCE_NAME" | tr '_' '-')
+          docker build . -t ${{ needs.fetch_sources.outputs.team_registry }}/$SOURCE_NAME:$PROJECT_NAME
+          docker push ${{ needs.fetch_sources.outputs.team_registry }}/$SOURCE_NAME:$PROJECT_NAME
+
 #   deploy_sources:
 #     if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch')  && needs.fetch_sources.outputs.matrix != '[]' && github.ref_name == github.event.repository.default_branch }}
 #     runs-on: ubuntu-latest
