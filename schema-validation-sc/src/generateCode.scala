@@ -34,10 +34,10 @@ import java.io.BufferedWriter
   )
 
 def writeFile(filename: String, content: String): Try[Unit] =
-    Using(BufferedWriter(FileWriter(Paths.get(filename).toFile(), false))) {
-      bufferedWriter =>
-        bufferedWriter.write(content)
-    }
+  Using(BufferedWriter(FileWriter(Paths.get(filename).toFile(), false))) {
+    bufferedWriter =>
+      bufferedWriter.write(content)
+  }
 
 def templateCode(
     config: DelomatenConfig,

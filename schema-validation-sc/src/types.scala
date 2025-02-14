@@ -13,7 +13,7 @@ extension (str: String)
   def newlines = s"\n\n$str\n\n"
 
 enum PseudoOperation:
-  case Pseudo, Depseudo, Repseudo//, Redact
+  case Pseudo, Depseudo, Repseudo // , Redact
 
 given Decoder[PseudoOperation] = ConfiguredEnumDecoder.derive(_.toUpperCase)
 given Encoder[PseudoOperation] = ConfiguredEnumEncoder.derive(_.toUpperCase)
@@ -35,8 +35,7 @@ case class PseudoTask(
 
 given Decoder[HashMap[String, String]] with
   def apply(c: HCursor): Decoder.Result[HashMap[String, String]] =
-    for
-      listOfMaps <- c.as[List[Map[String, String]]]
+    for listOfMaps <- c.as[List[Map[String, String]]]
     yield HashMap.from(listOfMaps.flatten)
 
 given Decoder[PseudoTask] = ConfiguredDecoder.derived(using
