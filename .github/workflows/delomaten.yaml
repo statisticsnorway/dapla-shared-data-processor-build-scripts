@@ -287,6 +287,7 @@ jobs:
             atlantis/apply
 
   build_and_push:
+    # TODO: Change back to `github.event_name == 'push'` after testing
     if: ${{ (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && needs.fetch_sources.outputs.all_sources_deleted != 'true' && needs.fetch_sources.outputs.matrix != '[]' }}
     needs: [ fetch_sources ]
     runs-on: ubuntu-latest
@@ -328,6 +329,7 @@ jobs:
           git clone -b add-gha-for-delomaten https://github.com/statisticsnorway/dapla-shared-data-processor-build-scripts
       - name: Build python script for ${{ matrix.source }}
         run: |
+          set -x
           MATRIX=${{ matrix.source }}
           IFS=',' read -r SOURCE_NAME PROJECT_NAME <<< "$MATRIX"
           cd dapla-shared-data-processor-build-scripts/schema-validation-sc
