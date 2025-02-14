@@ -6,12 +6,6 @@ import io.circe.derivation.*
 import io.circe.generic.semiauto.*
 import scala.collection.immutable.*
 
-// Helper extensions for String type
-extension (str: String)
-  def red = str.split("\n").map(Console.RED + _).mkString("\n")
-  def green = str.split("\n").map(Console.GREEN + _).mkString("\n")
-  def newlines = s"\n\n$str\n\n"
-
 enum PseudoOperation:
   case Pseudo, Depseudo, Repseudo // , Redact
 

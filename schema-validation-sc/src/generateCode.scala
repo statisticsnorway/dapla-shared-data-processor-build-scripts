@@ -5,7 +5,7 @@
 //> using dep io.circe::circe-parser:0.14.10
 //> using files types.scala utils.scala
 import com.schemavalidation.types.{given, *}
-import com.schemavalidation.utils.loadConfig
+import com.schemavalidation.utils.*
 import java.nio.file.{Files, Path, Paths}
 import scala.util.{Try, Using}
 import java.io.FileWriter
@@ -20,7 +20,7 @@ import java.io.BufferedWriter
 
   val config: DelomatenConfig = loadConfig(configPath)
 
-  val code: String =
+  val pseudoTasks: String =
     config.pseudo
       .groupBy(_.pseudoOperation)
       .map(genPseudoTask)
@@ -28,9 +28,14 @@ import java.io.BufferedWriter
       .map(_(_))
       .mkString("\n\n")
 
+  val code = templateCode(config, pseudoTasks)
+
+  println("Python code generated successfully".green.newlines)
+  println(code.yellow)
+
   writeFile(
     "process_shared_data.py",
-    templateCode(config, code)
+    code
   )
 
 def writeFile(filename: String, content: String): Try[Unit] =

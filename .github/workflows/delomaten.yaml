@@ -201,16 +201,16 @@ jobs:
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
         run: |
           MATRIX=${{ matrix.source }}
-          IFS=',' read -r FOLDER_NAME ENV_NAME <<< "$MATRIX"
-          echo "Running test for source: $FOLDER_NAME-$ENV_NAME"
+          IFS=',' read -r FOLDER_NAME PROJECT_NAME <<< "$MATRIX"
+          echo "Running test for source: $FOLDER_NAME-$PROJECT_NAME"
 
           set -eo pipefail
 
-          export CONFIG_FILE_PATH="$GITHUB_WORKSPACE/automation/shared-data/$ENV_NAME/$FOLDER_NAME"
-          export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$ENV_NAME/buckets-shared.yaml"
+          export CONFIG_FILE_PATH="$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME"
+          export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$PROJECT_NAME/buckets-shared.yaml"
           cd dapla-shared-data-processor-build-scripts/schema-validation-sc
 
-          scala-cli run -q src/validateConfig.scala -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
+          scala-cli run -q src/validateConfig.scala -- "$PROJECT_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
 
   plan:
     if: ${{ github.event_name == 'pull_request' }}
@@ -331,10 +331,10 @@ jobs:
         run: |
           set -x
           MATRIX=${{ matrix.source }}
-          IFS=',' read -r SOURCE_NAME PROJECT_NAME <<< "$MATRIX"
+          IFS=',' read -r FOLDER_NAME PROJECT_NAME <<< "$MATRIX"
           cd dapla-shared-data-processor-build-scripts/schema-validation-sc
 
-          scala-cli run -q src/generateConfig.scala -- "automation/shared-data/$PROJECT_NAME/$SOURCE_NAME/config.yaml"
+          scala-cli run -q src/generateConfig.scala -- "automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
 
           cat process_shared_data.py
       - name: Build and push image for ${{ matrix.source }}
