@@ -210,7 +210,7 @@ jobs:
           export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$ENV_NAME/buckets-shared.yaml"
           cd dapla-shared-data-processor-build-scripts/schema-validation-sc
 
-          scala-cli run src/validateConfig.scala -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" | grep -v -E "Download.+|Check.+"
+          scala-cli run -q src/validateConfig.scala -- "$ENV_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH" 2>&1
 
 
 
