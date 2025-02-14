@@ -19,7 +19,8 @@ import java.io.BufferedWriter
     )
 
   val config: DelomatenConfig = loadConfig(configPath)
-  val destinationFolder: String = configPath.getParent().getFileName().toString()
+  val destinationFolder: String =
+    configPath.getParent().getFileName().toString()
 
   val pseudoTasks: String =
     config.pseudo
