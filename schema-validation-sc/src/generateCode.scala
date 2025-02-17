@@ -19,8 +19,6 @@ import java.io.BufferedWriter
     )
 
   val config: DelomatenConfig = loadConfig(configPath)
-  val destinationFolder: String =
-    configPath.getParent().getFileName().toString()
 
   val pseudoTasks: String =
     config.pseudo
@@ -30,7 +28,7 @@ import java.io.BufferedWriter
       .map(_(_))
       .mkString("\n\n")
 
-  val code = templateCode(destinationFolder, config, pseudoTasks)
+  val code = templateCode(config, pseudoTasks)
 
   println("Python code generated successfully".green.newlines)
   println(code.yellow)
@@ -47,7 +45,6 @@ def writeFile(filename: String, content: String): Try[Unit] =
   }
 
 def templateCode(
-    destinationFolder: String,
     config: DelomatenConfig,
     code: String
 ): String =
@@ -71,7 +68,7 @@ def templateCode(
 
     |    client = storage.Client()
     |    bucket = client.bucket("${config.sharedBucket}")
-    |    blob = bucket.blob(str(Path("${destinationFolder}", Path(file_path).name)))
+    |    blob = bucket.blob(str(Path("${config.destinationFolder}", Path(file_path).name)))
     |
     |    buffer = io.BytesIO()
     |    final_df.write_parquet(buffer)
