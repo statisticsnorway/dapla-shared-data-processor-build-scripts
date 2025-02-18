@@ -1,0 +1,41 @@
+name: Test delomaten config schema validity
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'schema-validation'
+      - '.github/workflows/test-schema-validity.yaml'
+  pull_request:
+    paths:
+      - 'schema-validation'
+      - '.github/workflows/test-schema-validity.yaml'
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  run-delomaten-schema-tests:
+    name: Run schema validity tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup caching
+        uses: coursier/cache-action@v6.4
+      - name: Setup Scala CLI
+        uses: VirtusLab/scala-cli-setup@v1.5
+      - name: Scala code formatting check
+        run: |
+          scala-cli fmt --check . || (
+            echo "To format code run"
+            echo "  scala-cli fmt ."
+            exit 1
+          )
+      - name: Run tests
+        run: |
+          cd schema-validation
+          scala-cli test test/
