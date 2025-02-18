@@ -1,4 +1,4 @@
-name: Test delomaten config schema validity (Scala)
+name: Test delomaten config schema validity
 
 on:
   push:
