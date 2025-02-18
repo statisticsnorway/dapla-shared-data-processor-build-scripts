@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'schema-validation-sc'
-      - '.github/workflows/test-schema-validity-scala.yaml'
+      - 'schema-validation'
+      - '.github/workflows/test-schema-validity.yaml'
   pull_request:
     paths:
-      - 'schema-validation-sc'
-      - '.github/workflows/test-schema-validity-scala.yaml'
+      - 'schema-validation'
+      - '.github/workflows/test-schema-validity.yaml'
 
 permissions:
   contents: read
