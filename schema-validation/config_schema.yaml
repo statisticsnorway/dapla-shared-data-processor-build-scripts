@@ -2,7 +2,7 @@
 
 ---
 
-$schema: 'http://stsci.edu/schemas/yaml-schema/draft-01'
+$schema: 'https://json-schema.org/draft/2020-12/schema'
 
 title: |
   'Delomaten' configuration data
@@ -27,6 +27,10 @@ properties:
       to fetch the files
     type: string
     pattern: "(^([a-zA-Z0-9])[/a-zA-Z0-9]+[a-zA-Z0-9]$|^[a-zA-Z]*$)"
+    errorMessage:
+      pattern: |
+        Validation error in 'source_folder' property. Folder prefixes cannot begin or end with a '/' character
+        and can otherwise only contain alphanumerical characters
 
   destination_folder:
     description: |
@@ -34,6 +38,10 @@ properties:
       to write the processed files to
     type: string
     pattern: "(^([a-zA-Z0-9])[/a-zA-Z0-9]+[a-zA-Z0-9]$|^[a-zA-Z]*$)"
+    errorMessage:
+      pattern: |
+          Validation error in 'source_folder' property. Folder prefixes cannot begin or end with a '/' character
+          and can otherwise only contain alphanumerical characters
 
   memory_size:
     description: |
@@ -49,12 +57,18 @@ properties:
     minItems: 1
     items:
       type: string
+    errorMessage:
+      minItems: |
+        Validation error in 'output_columns'. The array must contain at least one element.
 
   pseudo:
     description: |
       The pseudonymization tasks to be run
     type: array
     minItems: 1
+    errorMessage:
+      minItems: |
+        Validation error in 'output_columns'. The array must contain at least one element.
     items:
       type: object
       required:
@@ -75,6 +89,9 @@ properties:
             Which columns in the dataframe to target
           type: array
           minItems: 1
+          errorMessage:
+            minItems: |
+              Validation error in 'columns'. The array must contain at least one element.
           items:
             type: string
 
@@ -85,6 +102,7 @@ properties:
             - "PSEUDO"
             - "DEPSEUDO"
             - "REPSEUDO"
+            #- "REDACT"
 
         encryption_algorithm:
           description: |
@@ -93,11 +111,15 @@ properties:
             - "default"
             - "papis_compatible"
             - "sid_mapping"
-            - "redact"
 
         encryption_args:
           description: |
             Any additional arguments to pass to the encryption algorithm
           type: array
           items:
-            type: string
+            type: object
+            properties:
+              sid_mapping_date:
+                type: string
+                format: date
+            additionalProperties: false
