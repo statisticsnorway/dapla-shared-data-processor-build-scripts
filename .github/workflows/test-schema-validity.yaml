@@ -37,5 +37,5 @@ jobs:
           )
       - name: Run tests
         run: |
-          cd schema-validation-sc
+          cd schema-validation
           scala-cli test test/

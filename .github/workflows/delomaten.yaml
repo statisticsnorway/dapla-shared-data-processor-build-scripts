@@ -208,7 +208,7 @@ jobs:
 
           export CONFIG_FILE_PATH="$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME"
           export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$PROJECT_NAME/buckets-shared.yaml"
-          cd dapla-shared-data-processor-build-scripts/schema-validation-sc
+          cd dapla-shared-data-processor-build-scripts/schema-validation
 
           scala-cli run -q src/validateConfig.scala -- "$PROJECT_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
 
@@ -331,7 +331,7 @@ jobs:
           MATRIX=${{ matrix.source }}
           IFS=',' read -r FOLDER_NAME PROJECT_NAME <<< "$MATRIX"
 
-          scala-cli run -q dapla-shared-data-processor-build-scripts/schema-validation-sc/src/generateCode.scala -- "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
+          scala-cli run -q dapla-shared-data-processor-build-scripts/schema-validation/src/generateCode.scala -- "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
       - name: Build and push image for ${{ matrix.source }}
         run: |
           MATRIX=${{ matrix.source }}
