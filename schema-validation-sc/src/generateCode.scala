@@ -54,7 +54,7 @@ def templateCode(
       s"final_df = result.to_polars().select(${columns})"
     case None => ""
 
-  s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Reseudonymize
+  s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
     |from google.cloud import storage
     |import io
     |from pathlib import Path
