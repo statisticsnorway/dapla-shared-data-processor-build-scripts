@@ -80,7 +80,10 @@ import scala.jdk.CollectionConverters.*
   val sharedBuckets: List[String] = loadConfig(Paths.get(sharedBucketsPath))
 
   // If the shared bucket specified in the config.yaml doesn't exist in the dapla team, report an error
-  if !sharedBuckets.exists(bucketShortName => delomaten.sharedBucket `contains` bucketShortName) then
+  if !sharedBuckets.exists(bucketShortName =>
+      delomaten.sharedBucket `contains` bucketShortName
+    )
+  then
     println(s"""
       |In the configuration file "${configDataPath}" in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
 
