@@ -401,7 +401,7 @@ jobs:
         env:
           PROJECT_ID: ${{ steps.get_project_id.outputs.project_id }}
         run: |
-          SA_EMAIL="gha-kildomaten-deploy-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+          SA_EMAIL="gha-delomaten-deploy-sa@${PROJECT_ID}.iam.gserviceaccount.com"
           echo sa_email=$SA_EMAIL >> $GITHUB_OUTPUT
       - name: Output dapla_environment
         id: output_dapla_environment
