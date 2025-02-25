@@ -59,11 +59,16 @@ def templateCode(
     |import io
     |from pathlib import Path
     |import polars as pl
+    |import sys
 
     |def main(file_path):
-    |    df = pl.read_parquet(file_path)
+    |    try:
+    |        df = pl.read_parquet(file_path)
+    |    except Exception as e:
+    |        print(f"Failed to read {file_path} from parquet into dataframe\n\n{e}")
+    |        sys.exit(1)
+    |
     |${code}
-
     |    ${outputCols}
 
     |    client = storage.Client()
@@ -75,6 +80,7 @@ def templateCode(
     |    buffer.seek(0)
 
     |    blob.upload_from_file(buffer, content_type="application/octet-stream")
+    |    print("Result uploaded to ${config.sharedBucket}/${config.destinationFolder}")
   """.stripMargin
 
 def genPseudoTask(
