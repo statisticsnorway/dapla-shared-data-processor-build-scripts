@@ -55,6 +55,7 @@ def templateCode(
     case None => ""
 
   s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
+    |import logging
     |from google.cloud import storage
     |import io
     |from pathlib import Path
@@ -65,7 +66,7 @@ def templateCode(
     |    try:
     |        df = pl.read_parquet(file_path)
     |    except Exception as e:
-    |        print(f"Failed to read {file_path} from parquet into dataframe\\n\\n{e}")
+    |        logging.error(f"Failed to read {file_path} from parquet into dataframe\\n\\n{e}")
     |        sys.exit(1)
     |
     |${code}
@@ -80,7 +81,7 @@ def templateCode(
     |    buffer.seek(0)
 
     |    blob.upload_from_file(buffer, content_type="application/octet-stream")
-    |    print("Result uploaded to ${config.sharedBucket}/${config.destinationFolder}")
+    |    logging.info("Result uploaded to ${config.sharedBucket}/${config.destinationFolder}")
   """.stripMargin
 
 def genPseudoTask(
