@@ -421,7 +421,7 @@ jobs:
           # The image and processor name uses source name with dash instead of underscore.
           GCP_SOURCE_NAME=$(echo "$SOURCE_NAME" | tr '_' '-')
           # Processor name is prefixed with 'source-' and has the postfix '-processor'
-          PROCESSOR_NAME="source-${SOURCE_NAME}-processor"
+          PROCESSOR_NAME="shared-${SOURCE_NAME}-processor"
           echo processor_name=$PROCESSOR_NAME >> $GITHUB_OUTPUT
           echo gcp_source_name=$GCP_SOURCE_NAME >> $GITHUB_OUTPUT
       - id: "auth-project-sa"
