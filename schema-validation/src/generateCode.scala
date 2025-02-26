@@ -65,7 +65,7 @@ def templateCode(
     |    try:
     |        df = pl.read_parquet(file_path)
     |    except Exception as e:
-    |        print(f"Failed to read {file_path} from parquet into dataframe\n\n{e}")
+    |        print(f"Failed to read {file_path} from parquet into dataframe\\n\\n{e}")
     |        sys.exit(1)
     |
     |${code}
