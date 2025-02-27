@@ -112,7 +112,7 @@ import scala.jdk.CollectionConverters.*
   )
 
 def printGHAFileError(filePath: Path, message: String): Unit =
-  println(s"::error file=${filePath.toString()}::{$message}")
+  println(s"::error file=${filePath.toString()},title=Validation Error::$message")
 
 // Ensure that the pseudo task columns are only targeted once.
 def pseudoTaskColumnsUniquelyTargeted(filePath: Path, pseudoTasks: List[PseudoTask]): Unit =
