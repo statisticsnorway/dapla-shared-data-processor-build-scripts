@@ -54,7 +54,7 @@ import scala.jdk.CollectionConverters.*
     System.exit(1)
 
   val configDataPath: Path = Paths.get(directoryPath, "config.yaml")
-  val contextualPath = Paths.get(environment, folder, "config.yaml")
+  // val contextualPath = Paths.get(environment, folder, "config.yaml")
 
   if !Files.exists(configDataPath) then
     val context = Paths.get(environment, folder).toString()
@@ -71,7 +71,7 @@ import scala.jdk.CollectionConverters.*
 
   validateConfigSchema(configDataPath) match
     case Left(errMessages) =>
-      printGHAFileError(contextualPath, errMessages.mkString("\n"))
+      printGHAFileError(configDataPath, errMessages.mkString("\n"))
     case Right(_) => ()
 
   val delomaten: DelomatenConfig = loadConfig(configDataPath)
@@ -82,7 +82,7 @@ import scala.jdk.CollectionConverters.*
       delomaten.sharedBucket `contains` bucketShortName
     )
   then
-    printGHAFileError(contextualPath, s"""
+    printGHAFileError(configDataPath, s"""
       |In the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
 
       |Existing shared buckets for ${environment}:
@@ -96,7 +96,7 @@ import scala.jdk.CollectionConverters.*
   delomaten.outputColumns match
     case Some(columns) if (pseudoTargetedColumns &~ columns.toSet).size > 0 =>
       val diff = pseudoTargetedColumns &~ columns.toSet
-      printGHAFileError(contextualPath, s"""
+      printGHAFileError(configDataPath, s"""
           |In the field 'output_columns' not all columns targeted by pseudo operations are listed in the 'output_columns'.
 
           |The missing columns are:
@@ -105,7 +105,7 @@ import scala.jdk.CollectionConverters.*
       System.exit(1)
     case _ => ()
 
-  pseudoTaskColumnsUniquelyTargeted(contextualPath, delomaten.pseudo)
+  pseudoTaskColumnsUniquelyTargeted(configDataPath, delomaten.pseudo)
 
   println(
     s"The '${configDataPath}' configuration was successfully validated!".green.newlines
@@ -115,7 +115,7 @@ def printGHAFileError(filePath: Path, message: String): Unit =
   println(s"::error file=${filePath.toString()}::{$message}")
 
 // Ensure that the pseudo task columns are only targeted once.
-def pseudoTaskColumnsUniquelyTargeted(contextualPath: Path, pseudoTasks: List[PseudoTask]): Unit =
+def pseudoTaskColumnsUniquelyTargeted(filePath: Path, pseudoTasks: List[PseudoTask]): Unit =
   val assocMap: Map[String, List[String]] =
     pseudoTasks.map(task => task.name -> task.columns).toMap
 
@@ -124,7 +124,7 @@ def pseudoTaskColumnsUniquelyTargeted(contextualPath: Path, pseudoTasks: List[Ps
     for (taskNameB, targetedColumnsB) <- remainingMap do
       val overlappingColumns = Set(targetedColumns) & Set(targetedColumnsB)
       if overlappingColumns.size > 0 then
-        printGHAFileError(contextualPath,
+        printGHAFileError(filePath,
           s"""
             |The pseudo tasks '${taskName}' and '${taskNameB}' target overlapping columns.
 
