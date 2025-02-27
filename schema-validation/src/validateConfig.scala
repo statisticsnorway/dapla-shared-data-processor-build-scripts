@@ -101,11 +101,11 @@ import scala.jdk.CollectionConverters.*
 
           |The missing columns are:
           |  ${diff.map("- " + _).mkString("\n")}
-        """.stripMargin.red.newlines)
+        """.stripMargin)
       System.exit(1)
     case _ => ()
 
-  pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
+  pseudoTaskColumnsUniquelyTargeted(contextualPath, delomaten.pseudo)
 
   println(
     s"The '${configDataPath}' configuration was successfully validated!".green.newlines
@@ -115,7 +115,7 @@ def printGHAFileError(filePath: Path, message: String): Unit =
   println(s"::error file=${filePath.toString()}::{$message}")
 
 // Ensure that the pseudo task columns are only targeted once.
-def pseudoTaskColumnsUniquelyTargeted(pseudoTasks: List[PseudoTask]): Unit =
+def pseudoTaskColumnsUniquelyTargeted(contextualPath: Path, pseudoTasks: List[PseudoTask]): Unit =
   val assocMap: Map[String, List[String]] =
     pseudoTasks.map(task => task.name -> task.columns).toMap
 
@@ -124,13 +124,13 @@ def pseudoTaskColumnsUniquelyTargeted(pseudoTasks: List[PseudoTask]): Unit =
     for (taskNameB, targetedColumnsB) <- remainingMap do
       val overlappingColumns = Set(targetedColumns) & Set(targetedColumnsB)
       if overlappingColumns.size > 0 then
-        println(
+        printGHAFileError(contextualPath,
           s"""
             |The pseudo tasks '${taskName}' and '${taskNameB}' target overlapping columns.
 
             |Overlapping columns:
             |  ${overlappingColumns.map("- " + _).mkString("\n")}
-          """.stripMargin.red.newlines
+          """.stripMargin
         )
         System.exit(1)
 
