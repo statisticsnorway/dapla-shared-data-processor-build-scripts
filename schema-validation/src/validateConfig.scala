@@ -54,6 +54,7 @@ import scala.jdk.CollectionConverters.*
     System.exit(1)
 
   val configDataPath: Path = Paths.get(directoryPath, "config.yaml")
+  val contextualPath = Paths.get(environment, folder, "config.yaml")
 
   if !Files.exists(configDataPath) then
     val context = Paths.get(environment, folder).toString()
@@ -70,10 +71,7 @@ import scala.jdk.CollectionConverters.*
 
   validateConfigSchema(configDataPath) match
     case Left(errMessages) =>
-      val contextualPath = Paths.get(environment, folder, "config.yaml")
-      println(
-        s"The delomaten configuration file '${contextualPath}' is invalid:\n\n${errMessages.mkString("\n")}".red.newlines
-      )
+      printGHAFileError(contextualPath, errMessages.mkString("\n"))
     case Right(_) => ()
 
   val delomaten: DelomatenConfig = loadConfig(configDataPath)
@@ -84,12 +82,12 @@ import scala.jdk.CollectionConverters.*
       delomaten.sharedBucket `contains` bucketShortName
     )
   then
-    println(s"""
-      |In the configuration file "${configDataPath}" in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
+    printGHAFileError(contextualPath, s"""
+      |In the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
 
       |Existing shared buckets for ${environment}:
       |  ${sharedBuckets.map("- " + _).mkString("\n  ")}
-    """.stripMargin.red.newlines)
+    """.stripMargin)
     System.exit(1)
 
   val pseudoTargetedColumns: Set[String] =
@@ -98,9 +96,8 @@ import scala.jdk.CollectionConverters.*
   delomaten.outputColumns match
     case Some(columns) if (pseudoTargetedColumns &~ columns.toSet).size > 0 =>
       val diff = pseudoTargetedColumns &~ columns.toSet
-      println(s"""
-          |In the configuration file '${configDataPath}' in the field 'output_columns'
-          |not all columns targeted by pseudo operations are listed in the 'output_columns'.
+      printGHAFileError(contextualPath, s"""
+          |In the field 'output_columns' not all columns targeted by pseudo operations are listed in the 'output_columns'.
 
           |The missing columns are:
           |  ${diff.map("- " + _).mkString("\n")}
@@ -113,6 +110,9 @@ import scala.jdk.CollectionConverters.*
   println(
     s"The '${configDataPath}' configuration was successfully validated!".green.newlines
   )
+
+def printGHAFileError(filePath: Path, message: String): Unit =
+  println(s"::error file=${filePath.toString()}::{$message}")
 
 // Ensure that the pseudo task columns are only targeted once.
 def pseudoTaskColumnsUniquelyTargeted(pseudoTasks: List[PseudoTask]): Unit =
