@@ -59,24 +59,31 @@ class SchemaValidationTests extends munit.FunSuite:
   test("Yaml configurations are valid according to the schema specification") {
     (1 to 2).foreach { i =>
       val messages =
-        validateYaml(SchemaType.Config(s"./test/schema-test-data/valid_data$i.yaml"))
+        validateYaml(
+          SchemaType.Config(s"./test/schema-test-data/valid_data$i.yaml")
+        )
       assert(clue(messages.size) == clue(0))
     }
   }
 
-  test("Yaml configurations are invalid according to the schema specification") {
+  test(
+    "Yaml configurations are invalid according to the schema specification"
+  ) {
     (1 to 5).foreach { i =>
       val messages =
-        validateYaml(SchemaType.Config(s"./test/schema-test-data/invalid_data$i.yaml"))
+        validateYaml(
+          SchemaType.Config(s"./test/schema-test-data/invalid_data$i.yaml")
+        )
       assert(clue(messages.size) > clue(0))
     }
   }
 
   val configurationFixture = FunFixture[(Path, Path, String)](
     setup = { _testOptions =>
-      ( Paths.get("test/validation-tests/config.yaml")
-      , Paths.get("./test/validation-test-data/buckets-shared.yaml")
-      , "test"
+      (
+        Paths.get("test/validation-tests/config.yaml"),
+        Paths.get("./test/validation-test-data/buckets-shared.yaml"),
+        "test"
       )
     },
     teardown = identity
@@ -84,50 +91,82 @@ class SchemaValidationTests extends munit.FunSuite:
 
   import ValidationError.*
 
-  configurationFixture.test("Yaml configuration returns schema validation error") {
-    (contextualPath, sharedBucketsPath, environment) =>
-      val configDataPath: Path = Paths.get("./test/validation-test-data/invalid_schema.yaml")
-      val validationErrors: List[ValidationError] = validateConfiguration(configDataPath, contextualPath, sharedBucketsPath, environment)
-      assert(
-        validationErrors.exists { err => err match
+  configurationFixture.test(
+    "Yaml configuration returns schema validation error"
+  ) { (contextualPath, sharedBucketsPath, environment) =>
+    val configDataPath: Path =
+      Paths.get("./test/validation-test-data/invalid_schema.yaml")
+    val validationErrors: List[ValidationError] = validateConfiguration(
+      configDataPath,
+      contextualPath,
+      sharedBucketsPath,
+      environment
+    )
+    assert(
+      validationErrors.exists { err =>
+        err match
           case _: SchemaValidationError => true
-          case _ => false
-        }
-      )
+          case _                        => false
+      }
+    )
   }
 
-  configurationFixture.test("Yaml configuration returns shared buckets validation error") {
-    (contextualPath, sharedBucketsPath, environment) =>
-      val configDataPath: Path = Paths.get("./test/validation-test-data/invalid_shared_buckets.yaml")
-      val validationErrors: List[ValidationError] = validateConfiguration(configDataPath, contextualPath, sharedBucketsPath, environment)
-      assert(
-        validationErrors.exists { err => err match
+  configurationFixture.test(
+    "Yaml configuration returns shared buckets validation error"
+  ) { (contextualPath, sharedBucketsPath, environment) =>
+    val configDataPath: Path =
+      Paths.get("./test/validation-test-data/invalid_shared_buckets.yaml")
+    val validationErrors: List[ValidationError] = validateConfiguration(
+      configDataPath,
+      contextualPath,
+      sharedBucketsPath,
+      environment
+    )
+    assert(
+      validationErrors.exists { err =>
+        err match
           case _: NonExistantSharedBuckets => true
-          case _ => false
-        }
-      )
+          case _                           => false
+      }
+    )
   }
 
-  configurationFixture.test("Yaml configuration returns missing output columns validation error") {
-    (contextualPath, sharedBucketsPath, environment) =>
-      val configDataPath: Path = Paths.get("./test/validation-test-data/invalid_output_columns.yaml")
-      val validationErrors: List[ValidationError] = validateConfiguration(configDataPath, contextualPath, sharedBucketsPath, environment)
-      assert(
-        validationErrors.exists { err => err match
+  configurationFixture.test(
+    "Yaml configuration returns missing output columns validation error"
+  ) { (contextualPath, sharedBucketsPath, environment) =>
+    val configDataPath: Path =
+      Paths.get("./test/validation-test-data/invalid_output_columns.yaml")
+    val validationErrors: List[ValidationError] = validateConfiguration(
+      configDataPath,
+      contextualPath,
+      sharedBucketsPath,
+      environment
+    )
+    assert(
+      validationErrors.exists { err =>
+        err match
           case _: MissingOutputColumns => true
-          case _ => false
-        }
-      )
+          case _                       => false
+      }
+    )
   }
 
-  configurationFixture.test("Yaml configuration returns overlapping pseudo task columns validation error") {
-    (contextualPath, sharedBucketsPath, environment) =>
-      val configDataPath: Path = Paths.get("./test/validation-test-data/invalid_pseudo_task_columns.yaml")
-      val validationErrors: List[ValidationError] = validateConfiguration(configDataPath, contextualPath, sharedBucketsPath, environment)
-      assert(
-        validationErrors.exists { err => err match
+  configurationFixture.test(
+    "Yaml configuration returns overlapping pseudo task columns validation error"
+  ) { (contextualPath, sharedBucketsPath, environment) =>
+    val configDataPath: Path =
+      Paths.get("./test/validation-test-data/invalid_pseudo_task_columns.yaml")
+    val validationErrors: List[ValidationError] = validateConfiguration(
+      configDataPath,
+      contextualPath,
+      sharedBucketsPath,
+      environment
+    )
+    assert(
+      validationErrors.exists { err =>
+        err match
           case _: OverlappingPseudoTaskColumns => true
-          case _ => false
-        }
-      )
+          case _                               => false
+      }
+    )
   }
