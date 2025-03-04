@@ -54,6 +54,7 @@ import scala.jdk.CollectionConverters.*
     System.exit(1)
 
   val configDataPath: Path = Paths.get(directoryPath, "config.yaml")
+  val contextualPath = Paths.get(environment, folder, "config.yaml")
 
   if !Files.exists(configDataPath) then
     val context = Paths.get(environment, folder).toString()
@@ -70,7 +71,6 @@ import scala.jdk.CollectionConverters.*
 
   validateConfigSchema(configDataPath) match
     case Left(errMessages) =>
-      val contextualPath = Paths.get(environment, folder, "config.yaml")
       println(
         s"The delomaten configuration file '${contextualPath}' is invalid:\n\n${errMessages.mkString("\n")}".red.newlines
       )
@@ -85,7 +85,7 @@ import scala.jdk.CollectionConverters.*
     )
   then
     println(s"""
-      |In the configuration file "${configDataPath}" in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
+      |In the configuration file '${contextualPath}' in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
 
       |Existing shared buckets for ${environment}:
       |  ${sharedBuckets.map("- " + _).mkString("\n  ")}
@@ -99,11 +99,11 @@ import scala.jdk.CollectionConverters.*
     case Some(columns) if (pseudoTargetedColumns &~ columns.toSet).size > 0 =>
       val diff = pseudoTargetedColumns &~ columns.toSet
       println(s"""
-          |In the configuration file '${configDataPath}' in the field 'output_columns'
+          |In the configuration file '${contextualPath}' in the field 'output_columns'
           |not all columns targeted by pseudo operations are listed in the 'output_columns'.
 
           |The missing columns are:
-          |  ${diff.map("- " + _).mkString("\n")}
+          |  ${diff.map("- " + _).mkString("\n  ")}
         """.stripMargin.red.newlines)
       System.exit(1)
     case _ => ()
@@ -111,7 +111,7 @@ import scala.jdk.CollectionConverters.*
   pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
 
   println(
-    s"The '${configDataPath}' configuration was successfully validated!".green.newlines
+    s"The '${contextualPath}' configuration was successfully validated!".green.newlines
   )
 
 // Ensure that the pseudo task columns are only targeted once.
