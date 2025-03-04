@@ -91,7 +91,7 @@ def genPseudoTask(
   val pseudoOp = pseudoOperation match
     case PseudoOperation.Depseudo => "Depseudonymize"
     case PseudoOperation.Pseudo   => "Pseudonymize"
-    case PseudoOperation.Repseudo => "Reseudonymize"
+    case PseudoOperation.Repseudo => "Repseudonymize"
 
   val taskBlocks = tasks.map(genTaskBlock).mkString("\n")
 
