@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - 'schema-validation'
+      - 'schema-validation/**'
       - '.github/workflows/test-schema-validity.yaml'
   pull_request:
     paths:
-      - 'schema-validation'
+      - 'schema-validation/**'
       - '.github/workflows/test-schema-validity.yaml'
 
 permissions:
