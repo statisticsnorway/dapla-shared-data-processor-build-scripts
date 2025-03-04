@@ -51,7 +51,7 @@ class SchemaValidationTests extends munit.FunSuite:
       .asScala
       .toSet
 
-  test("Is config_schema.yaml a valid YAML schema specification?") {
+  test("Is config_schema_spec.yaml a valid YAML schema specification?") {
     val messages = validateYaml(SchemaType.Meta)
     assertEquals(messages.size, 0)
   }
