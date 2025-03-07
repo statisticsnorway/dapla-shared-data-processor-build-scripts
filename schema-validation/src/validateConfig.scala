@@ -5,6 +5,7 @@
 //> using dep io.circe::circe-parser:0.14.10
 //> using dep com.networknt:json-schema-validator:1.5.6
 //> using dep ch.qos.logback:logback-classic:1.5.17
+//> using test.dep org.scalameta::munit::1.1.0
 //> using files types.scala utils.scala
 package validate
 
@@ -22,6 +23,131 @@ import java.nio.file.{Files, Path, Paths}
 import scala.collection.immutable.*
 import scala.io.Source
 import scala.jdk.CollectionConverters.*
+import scala.util.boundary, boundary.break
+
+/** Represents the different possible validation erros that can occur in a
+  * delomaten configuration file.
+  */
+enum ValidationError:
+  case SchemaValidationError(
+      errorMessages: Set[ValidationMessage]
+  )
+  case NonExistantSharedBuckets(
+      environment: String,
+      sharedBucket: String,
+      sharedBuckets: List[String]
+  )
+  case MissingOutputColumns(
+      missingColumns: Set[String]
+  )
+  case OverlappingPseudoTaskColumns(
+      firstTaskName: String,
+      secondTaskName: String,
+      overlappingColumns: Set[String]
+  )
+
+/** Run all validations on the 'config.yaml' file and return a list of all
+  * validation errors found.
+  *
+  * @param configDataPath
+  *   the filepath to the 'config.yaml' file containing 'delomaten'
+  *   configuration
+  * @param contextualPath
+  *   an artificial path of the form $environment/$folder/config.yaml used to
+  *   provide better error messages
+  * @param sharedBucketsPath
+  *   the filepath to the shared-buckets buckets-shared.yaml file containing the
+  *   teams' shared-buckets
+  * @param environment
+  *   the dapla team environment the source belongs to i.e. 'uh-varer-prod' or
+  *   'play-obr-test'
+  * @return
+  *   a list of `ValidationError`s if any validation checks fail, otherwise an
+  *   empty list
+  */
+def validateConfiguration(
+    configDataPath: Path,
+    contextualPath: Path,
+    sharedBucketsPath: Path,
+    environment: String
+): List[ValidationError] =
+  import ValidationError.*
+  val delomaten: DelomatenConfig = loadConfig(configDataPath)
+  val sharedBuckets: List[String] = loadConfig(sharedBucketsPath)
+  val pseudoTargetedColumns: Set[String] =
+    delomaten.pseudo.flatMap(_.columns).toSet
+  List(
+    validateConfigSchema(configDataPath) match
+      case errMessages if errMessages.nonEmpty =>
+        Some(SchemaValidationError(errMessages))
+      case _ => None
+    ,
+    if !sharedBuckets.exists(bucketShortName =>
+        delomaten.sharedBucket `contains` bucketShortName
+      )
+    then
+      Some(
+        NonExistantSharedBuckets(
+          environment,
+          delomaten.sharedBucket,
+          sharedBuckets
+        )
+      )
+    else None,
+    delomaten.outputColumns match
+      case Some(columns) if (pseudoTargetedColumns &~ columns.toSet).nonEmpty =>
+        val missingColumns = pseudoTargetedColumns &~ columns.toSet
+        Some(MissingOutputColumns(missingColumns))
+      case _ => None
+    ,
+    pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
+  ).flatten
+
+/** Print error messags for validation errors
+  *
+  * @param validationErrors
+  *   validation errors
+  * @return
+  *   Unit
+  */
+def printErrors(
+    contextualPath: Path,
+    validationErrors: List[ValidationError]
+): Unit =
+  import ValidationError.*
+  validationErrors.foreach { valError =>
+    valError match
+      case SchemaValidationError(errorMessages) =>
+        println(
+          s"The delomaten configuration file '$contextualPath' is invalid:\n\n${errorMessages.mkString("\n")}".red.newlines
+        )
+      case NonExistantSharedBuckets(env, sharedBucket, sharedBuckets) =>
+        println(s"""
+        |In the configuration file '$contextualPath' in the field 'shared_bucket' the provided bucket '${sharedBucket}' does not exist.
+
+        |Existing shared buckets for $env:
+        |  ${sharedBuckets.map("- " + _).mkString("\n  ")}
+        |""".stripMargin.red.newlines)
+      case MissingOutputColumns(missingColumns) =>
+        println(s"""
+        |In the configuration file '$contextualPath' in the field 'output_columns'
+        |not all columns targeted by pseudo operations are listed in the 'output_columns'.
+
+        |The missing columns are:
+        |  ${missingColumns.map("- " + _).mkString("\n  ")}
+        |""".stripMargin.red.newlines)
+      case OverlappingPseudoTaskColumns(
+            firstTaskName,
+            secondTaskName,
+            overlappingColumns
+          ) =>
+        println(s"""
+        |In the configuration file '$contextualPath' the pseudo tasks '${firstTaskName}' and '${secondTaskName}' target overlapping columns.
+
+        |Overlapping columns:
+        |  ${overlappingColumns.map("- " + _).mkString("\n")}
+        |""".stripMargin.red.newlines)
+  }
 
 /** Validate if the config.yaml under the @directory_path is valid. Only uses
   * \@environment and @folder arguments to print more informative logs.
@@ -32,19 +158,19 @@ import scala.jdk.CollectionConverters.*
   * @param folder
   *   the statistics product folder which contains the configuration file i.e.
   *   'ledstill' or 'sykefra'
-  * @param directory_path
+  * @param directoryPath
   *   the filepath to the config.yaml file containing 'delomaten' configuration
-  * @param shared_buckets_path
-  *   the filepath to the shared-buckets iam.yaml file containing the teams'
-  *   shared-buckets
+  * @param sharedBucketsPathStr
+  *   the filepath to the shared-buckets buckets-shared.yaml file containing the
+  *   teams' shared-buckets
   * @return
   *   Unit
   */
-@main def validateConfig(
+@main def runValidation(
     environment: String,
     folder: String,
     directoryPath: String,
-    sharedBucketsPath: String
+    sharedBucketsPathStr: String
 ): Unit =
 
   if !Files.exists(Paths.get(directoryPath)) then
@@ -54,89 +180,67 @@ import scala.jdk.CollectionConverters.*
     System.exit(1)
 
   val configDataPath: Path = Paths.get(directoryPath, "config.yaml")
-  val contextualPath = Paths.get(environment, folder, "config.yaml")
+  val contextualPath: Path = Paths.get(environment, folder, "config.yaml")
 
   if !Files.exists(configDataPath) then
-    val context = Paths.get(environment, folder).toString()
+    val context = Paths.get(environment, folder)
     println(
       s"No 'config.yaml' file exists in the product source folder '${context}'".red.newlines
     )
     System.exit(1)
 
-  if !Files.exists(Paths.get(sharedBucketsPath)) then
+  val sharedBucketsPath: Path = Paths.get(sharedBucketsPathStr)
+
+  if !Files.exists(sharedBucketsPath) then
     println(
       s"The given shared-buckets path '${sharedBucketsPath}' does not exist".red.newlines
     )
     System.exit(1)
 
-  validateConfigSchema(configDataPath) match
-    case Left(errMessages) =>
-      println(
-        s"The delomaten configuration file '${contextualPath}' is invalid:\n\n${errMessages.mkString("\n")}".red.newlines
-      )
-    case Right(_) => ()
-
-  val delomaten: DelomatenConfig = loadConfig(configDataPath)
-  val sharedBuckets: List[String] = loadConfig(Paths.get(sharedBucketsPath))
-
-  // If the shared bucket specified in the config.yaml doesn't exist in the dapla team, report an error
-  if !sharedBuckets.exists(bucketShortName =>
-      delomaten.sharedBucket `contains` bucketShortName
-    )
-  then
-    println(s"""
-      |In the configuration file '${contextualPath}' in the field "shared_bucket" the provided bucket "${delomaten.sharedBucket}" does not exist.
-
-      |Existing shared buckets for ${environment}:
-      |  ${sharedBuckets.map("- " + _).mkString("\n  ")}
-    """.stripMargin.red.newlines)
-    System.exit(1)
-
-  val pseudoTargetedColumns: Set[String] =
-    delomaten.pseudo.flatMap(_.columns).toSet
-
-  delomaten.outputColumns match
-    case Some(columns) if (pseudoTargetedColumns &~ columns.toSet).size > 0 =>
-      val diff = pseudoTargetedColumns &~ columns.toSet
-      println(s"""
-          |In the configuration file '${contextualPath}' in the field 'output_columns'
-          |not all columns targeted by pseudo operations are listed in the 'output_columns'.
-
-          |The missing columns are:
-          |  ${diff.map("- " + _).mkString("\n  ")}
-        """.stripMargin.red.newlines)
+  validateConfiguration(
+    configDataPath,
+    contextualPath,
+    sharedBucketsPath,
+    environment
+  ) match
+    case validationErrors if validationErrors.nonEmpty =>
+      printErrors(contextualPath, validationErrors)
       System.exit(1)
     case _ => ()
-
-  pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
 
   println(
     s"The '${contextualPath}' configuration was successfully validated!".green.newlines
   )
 
+import ValidationError.OverlappingPseudoTaskColumns
 // Ensure that the pseudo task columns are only targeted once.
-def pseudoTaskColumnsUniquelyTargeted(pseudoTasks: List[PseudoTask]): Unit =
+def pseudoTaskColumnsUniquelyTargeted(
+    pseudoTasks: List[PseudoTask]
+): Option[OverlappingPseudoTaskColumns] =
   val assocMap: Map[String, List[String]] =
     pseudoTasks.map(task => task.name -> task.columns).toMap
 
-  for (taskName, targetedColumns) <- assocMap do
-    val remainingMap = assocMap - taskName
-    for (taskNameB, targetedColumnsB) <- remainingMap do
-      val overlappingColumns = Set(targetedColumns) & Set(targetedColumnsB)
-      if overlappingColumns.size > 0 then
-        println(
-          s"""
-            |The pseudo tasks '${taskName}' and '${taskNameB}' target overlapping columns.
+  boundary[Option[OverlappingPseudoTaskColumns]]:
+    for (taskName, targetedColumns) <- assocMap do
+      val remainingMap = assocMap - taskName
+      for (taskNameB, targetedColumnsB) <- remainingMap do
+        val overlappingColumns: Set[String] =
+          targetedColumns.toSet & targetedColumnsB.toSet
+        if overlappingColumns.nonEmpty then
+          break[Option[OverlappingPseudoTaskColumns]](
+            Some(
+              OverlappingPseudoTaskColumns(
+                taskName,
+                taskNameB,
+                overlappingColumns
+              )
+            )
+          )
+    None
 
-            |Overlapping columns:
-            |  ${overlappingColumns.map("- " + _).mkString("\n")}
-          """.stripMargin.red.newlines
-        )
-        System.exit(1)
-
-def validateConfigSchema(filepath: Path): Either[Set[ValidationMessage], Unit] =
+def validateConfigSchema(filepath: Path): Set[ValidationMessage] =
   val schemaData: String =
-    Source.fromFile("./config_schema.yaml").getLines().mkString("\n")
+    Source.fromFile("./config_schema_spec.yaml").getLines().mkString("\n")
   val inputData: String = Source
     .fromFile(filepath.toFile())
     .getLines()
@@ -153,7 +257,7 @@ def validateConfigSchema(filepath: Path): Either[Set[ValidationMessage], Unit] =
       builder => builder.jsonNodeReader(jsonNodeReader).build()
     )
     .getSchema(schemaData, InputFormat.YAML, config)
-  val messages: Set[ValidationMessage] = schema
+  schema
     .validate(
       inputData,
       InputFormat.YAML,
@@ -162,6 +266,3 @@ def validateConfigSchema(filepath: Path): Either[Set[ValidationMessage], Unit] =
     )
     .asScala
     .toSet
-
-  if messages.size == 0 then Right(())
-  else Left(messages)
