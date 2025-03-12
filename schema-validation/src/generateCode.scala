@@ -80,14 +80,15 @@ def templateCode(
 
     |    client = storage.Client()
     |    bucket = client.bucket("${config.sharedBucket}")
-    |    blob = bucket.blob(str(Path("${config.destinationFolder}", Path(file_path).name)))
+    |    filename = Path(file_path).name
+    |    blob = bucket.blob(str(Path("${config.destinationFolder}", filename)))
     |
     |    buffer = io.BytesIO()
     |    final_df.write_parquet(buffer)
     |    buffer.seek(0)
 
     |    blob.upload_from_file(buffer, content_type="application/octet-stream")
-    |    logging.info("Result uploaded to ${config.sharedBucket}/${config.destinationFolder}")
+    |    logging.info(f"Result uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename}")
   """.stripMargin
 
 def genPseudoTask(
