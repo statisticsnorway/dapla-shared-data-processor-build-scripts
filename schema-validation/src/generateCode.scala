@@ -75,7 +75,7 @@ def templateCode(
     |        sys.exit(1)
     |
     |${code}
-    |    logging.info("Metadata", result.metadata_details)
+    |    logging.info("Metadata %s", result.metadata_details)
     |    ${outputCols}
 
     |    client = storage.Client()
