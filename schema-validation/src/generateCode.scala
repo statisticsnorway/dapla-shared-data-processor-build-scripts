@@ -10,6 +10,11 @@ import java.nio.file.{Files, Path, Paths}
 import scala.util.{Try, Using}
 import java.io.FileWriter
 import java.io.BufferedWriter
+import DataFrameString.*
+
+enum DataFrameString:
+  case DataFrame
+  case Result
 
 @main def generateCode(configDataPath: String): Unit =
   val configPath: Path = Paths.get(configDataPath)
@@ -24,8 +29,8 @@ import java.io.BufferedWriter
     config.pseudo
       .groupBy(_.pseudoOperation)
       .map(genPseudoTask)
-      .zip(LazyList("df") ++ LazyList.continually("result"))
-      .map(_(_))
+      .zip(LazyList(DataFrame) ++ LazyList.continually(Result))
+      .map { case (f, s) => f(s) }
       .mkString("\n\n")
 
   val code = templateCode(config, pseudoTasks)
@@ -70,6 +75,7 @@ def templateCode(
     |        sys.exit(1)
     |
     |${code}
+    |    logging.info(result.metadata_details)
     |    ${outputCols}
 
     |    client = storage.Client()
@@ -87,7 +93,7 @@ def templateCode(
 def genPseudoTask(
     pseudoOperation: PseudoOperation,
     tasks: List[PseudoTask]
-): String => String =
+): DataFrameString => String =
   val pseudoOp = pseudoOperation match
     case PseudoOperation.Depseudo => "Depseudonymize"
     case PseudoOperation.Pseudo   => "Pseudonymize"
@@ -95,9 +101,16 @@ def genPseudoTask(
 
   val taskBlocks = tasks.map(genTaskBlock).mkString("\n")
 
-  dataFrame => s"""    result = (
+  dataFrame =>
+    val fromType = dataFrame match
+      case DataFrame => "polars"
+      case Result => "result"
+    val dataFrameString = dataFrame match
+      case DataFrame => "df"
+      case Result => "result"
+    s"""    result = (
     |      ${pseudoOp}
-    |        .from_polars(${dataFrame})
+    |        .from_${fromType}(${dataFrameString})
     |${taskBlocks}
     |        .run()
     |    )""".stripMargin
