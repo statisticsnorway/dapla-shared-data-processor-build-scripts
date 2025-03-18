@@ -72,7 +72,7 @@ def templateCode(
     |        pseudo_service_url=os.getenv(os.environ['PSEUDO_SERVICE_URL']),
     |        auth_token=os.getenv(os.environ.get('PSEUDO_SERVICE_AUTH_TOKEN', '')),
     |    )
-    |    logging.info("AUTH TOKEN:\n\n%s", pseudo_client._PseudoClient__auth_token())
+    |    logging.info("AUTH TOKEN:\\n\\n%s", pseudo_client._PseudoClient__auth_token())
     |
     |    try:
     |        df = pl.read_parquet(file_path)
