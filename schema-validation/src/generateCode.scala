@@ -59,7 +59,7 @@ def templateCode(
       s"final_df = result.to_polars().select(${columns})"
     case None => ""
 
-  s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
+  s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize, PseudoClient
     |import logging
     |from google.cloud import storage
     |import io
@@ -72,7 +72,7 @@ def templateCode(
     |        pseudo_service_url=os.getenv(os.environ['PSEUDO_SERVICE_URL']),
     |        auth_token=os.getenv(os.environ.get('PSEUDO_SERVICE_AUTH_TOKEN', '')),
     |    )
-    |     logging.info("AUTH TOKEN:\n\n%s", pseudo_client._PseudoClient__auth_token())
+    |    logging.info("AUTH TOKEN:\n\n%s", pseudo_client._PseudoClient__auth_token())
     |
     |    try:
     |        df = pl.read_parquet(file_path)
