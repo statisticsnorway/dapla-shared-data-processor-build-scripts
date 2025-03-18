@@ -66,6 +66,7 @@ def templateCode(
     |from pathlib import Path
     |import polars as pl
     |import sys
+    |import os
 
     |def main(file_path):
     |    pseudo_client = PseudoClient(
