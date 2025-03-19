@@ -1,8 +1,8 @@
 //> using scala 3.6.3
 //> using dep org.typelevel::cats-core:2.13.0
 //> using dep io.circe::circe-yaml:1.15.0
-//> using dep io.circe::circe-generic:0.14.10
-//> using dep io.circe::circe-parser:0.14.10
+//> using dep io.circe::circe-generic:0.14.12
+//> using dep io.circe::circe-parser:0.14.12
 //> using files types.scala utils.scala
 import com.schemavalidation.types.{given, *}
 import com.schemavalidation.utils.*
@@ -53,11 +53,11 @@ def templateCode(
     config: DelomatenConfig,
     code: String
 ): String =
-  val outputCols: String = config.outputColumns match
-    case Some(outputColumns) =>
-      val columns: String = outputColumns.map(col => s"\"$col\"").mkString(",")
-      s"final_df = result.to_polars().select(${columns})"
-    case None => ""
+  val outputCols: String = "final_df = result.to_polars()" ++
+    config.outputColumns.map { (columns: List[String]) =>
+      val columnsFormatted: String = columns.map(column => s"\"$column\"").mkString(",")
+      s".select(${columnsFormatted})"
+    }.getOrElse("")
 
   s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize, PseudoClient
     |import logging
