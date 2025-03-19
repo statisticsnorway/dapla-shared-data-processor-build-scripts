@@ -59,22 +59,15 @@ def templateCode(
       s".select(${columnsFormatted})"
     }.getOrElse("")
 
-  s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize, PseudoClient
+  s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
     |import logging
     |from google.cloud import storage
     |import io
     |from pathlib import Path
     |import polars as pl
     |import sys
-    |import os
 
     |def main(file_path):
-    |    pseudo_client = PseudoClient(
-    |        pseudo_service_url=os.getenv(os.environ['PSEUDO_SERVICE_URL']),
-    |        auth_token=os.getenv(os.environ.get('PSEUDO_SERVICE_AUTH_TOKEN', '')),
-    |    )
-    |    logging.info("AUTH TOKEN:\\n\\n%s", pseudo_client._PseudoClient__auth_token())
-    |
     |    try:
     |        df = pl.read_parquet(file_path)
     |    except Exception as e:
