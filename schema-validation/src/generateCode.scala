@@ -54,10 +54,13 @@ def templateCode(
     code: String
 ): String =
   val outputCols: String = "final_df = result.to_polars()" ++
-    config.outputColumns.map { (columns: List[String]) =>
-      val columnsFormatted: String = columns.map(column => s"\"$column\"").mkString(",")
-      s".select(${columnsFormatted})"
-    }.getOrElse("")
+    config.outputColumns
+      .map { (columns: List[String]) =>
+        val columnsFormatted: String =
+          columns.map(column => s"\"$column\"").mkString(",")
+        s".select(${columnsFormatted})"
+      }
+      .getOrElse("")
 
   s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
     |import logging
@@ -105,10 +108,10 @@ def genPseudoTask(
   dataFrame =>
     val fromType = dataFrame match
       case DataFrame => "polars"
-      case Result => "result"
+      case Result    => "result"
     val dataFrameString = dataFrame match
       case DataFrame => "df"
-      case Result => "result"
+      case Result    => "result"
     s"""    result = (
     |      ${pseudoOp}
     |        .from_${fromType}(${dataFrameString})
