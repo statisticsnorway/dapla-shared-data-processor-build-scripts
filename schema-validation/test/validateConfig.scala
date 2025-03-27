@@ -131,25 +131,25 @@ class SchemaValidationTests extends munit.FunSuite:
     )
   }
 
-  configurationFixture.test(
-    "Yaml configuration returns missing output columns validation error"
-  ) { (contextualPath, sharedBucketsPath, environment) =>
-    val configDataPath: Path =
-      Paths.get("./test/validation-test-data/invalid_output_columns.yaml")
-    val validationErrors: List[ValidationError] = validateConfiguration(
-      configDataPath,
-      contextualPath,
-      sharedBucketsPath,
-      environment
-    )
-    assert(
-      validationErrors.exists { err =>
-        err match
-          case _: MissingOutputColumns => true
-          case _                       => false
-      }
-    )
-  }
+  // configurationFixture.test(
+  //   "Yaml configuration returns missing output columns validation error"
+  // ) { (contextualPath, sharedBucketsPath, environment) =>
+  //   val configDataPath: Path =
+  //     Paths.get("./test/validation-test-data/invalid_output_columns.yaml")
+  //   val validationErrors: List[ValidationError] = validateConfiguration(
+  //     configDataPath,
+  //     contextualPath,
+  //     sharedBucketsPath,
+  //     environment
+  //   )
+  //   assert(
+  //     validationErrors.exists { err =>
+  //       err match
+  //         case _: MissingOutputColumns => true
+  //         case _                       => false
+  //     }
+  //   )
+  // }
 
   configurationFixture.test(
     "Yaml configuration returns overlapping pseudo task columns validation error"

@@ -10,7 +10,10 @@ import java.nio.file.{Files, Path, Paths}
 import scala.util.{Try, Using}
 import java.io.FileWriter
 import java.io.BufferedWriter
+import java.text.SimpleDateFormat
 import DataFrameString.*
+import io.circe.syntax.*
+import io.circe.Json
 
 enum DataFrameString:
   case DataFrame
@@ -63,6 +66,7 @@ def templateCode(
       .getOrElse("")
 
   s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
+    |from datetime import date
     |import logging
     |from google.cloud import storage
     |import io
@@ -101,7 +105,6 @@ def genPseudoTask(
   val pseudoOp = pseudoOperation match
     case PseudoOperation.Depseudo => "Depseudonymize"
     case PseudoOperation.Pseudo   => "Pseudonymize"
-    case PseudoOperation.Repseudo => "Repseudonymize"
 
   val taskBlocks = tasks.map(genTaskBlock).mkString("\n")
 
@@ -120,16 +123,18 @@ def genPseudoTask(
     |    )""".stripMargin
 
 def genTaskBlock(task: PseudoTask): String =
-  val sidMappingArg = (for
-    argMap <- task.encryptionArgs
-    sidMappingDate <- argMap.get("sid_mapping_date")
-  yield s"sid_snapshot_date=\"${sidMappingDate}\"").getOrElse("")
-
-  val encryptAlgo = task.encryptionAlgorithm match
-    case EncryptionAlgorithm.Default => "with_default_encryption()"
-    case EncryptionAlgorithm.PapisCompatible =>
-      "with_papis_compatible_encryption()"
-    case EncryptionAlgorithm.SidMapping => s"with_stable_id(${sidMappingArg})"
+  import EncryptionAlgorithm.*
+  val encryptAlgo = task.encryption match
+    case Default(key) => s"with_default_encryption(custom_key=${key.asJson})"
+    case PapisCompatible(key) =>
+      s"with_papis_compatible_encryption(custom_key=${key.asJson})"
+    case SidMapping(key, sidSnapshotDate, sidOnMapFailure) =>
+      val date: Json =
+        sidSnapshotDate.map(_.asJson).getOrElse(Json.fromString("date.today()"))
+      val mapStrat: Json = sidOnMapFailure
+        .map(_.asJson)
+        .getOrElse(SidMapFailureStrategy.ReturnNull.asJson)
+      s"with_stable_id(custom_key=${key.asJson}, sid_snapshot_date=${date}, on_map_failure=${mapStrat})"
 
   val columns = task.columns.map(col => s"\"$col\"").mkString(",")
 
