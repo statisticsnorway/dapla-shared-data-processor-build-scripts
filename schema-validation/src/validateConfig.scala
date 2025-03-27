@@ -4,7 +4,7 @@
 //> using dep io.circe::circe-generic:0.14.10
 //> using dep io.circe::circe-parser:0.14.10
 //> using dep com.networknt:json-schema-validator:1.5.6
-//> using dep ch.qos.logback:logback-classic:1.5.17
+//> using dep ch.qos.logback:logback-classic:1.5.18
 //> using test.dep org.scalameta::munit::1.1.0
 //> using files types.scala utils.scala
 package validate
