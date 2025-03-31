@@ -105,8 +105,7 @@ case class DelomatenConfig(
     sourceFolderPrefix: String,
     destinationFolder: String,
     memorySize: Int,
-    pseudo: List[PseudoTask],
-    outputColumns: Option[List[String]]
+    pseudo: List[PseudoTask]
 )
 given Decoder[DelomatenConfig] = ConfiguredDecoder.derived(using
   Configuration.default.withSnakeCaseMemberNames
