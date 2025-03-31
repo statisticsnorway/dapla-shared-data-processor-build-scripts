@@ -56,15 +56,6 @@ def templateCode(
     config: DelomatenConfig,
     code: String
 ): String =
-  val outputCols: String = "final_df = result.to_polars()" ++
-    config.outputColumns
-      .map { (columns: List[String]) =>
-        val columnsFormatted: String =
-          columns.map(column => s"\"$column\"").mkString(",")
-        s".select(${columnsFormatted})"
-      }
-      .getOrElse("")
-
   s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
     |from datetime import date
     |import logging
@@ -83,7 +74,7 @@ def templateCode(
     |
     |${code}
     |    logging.info("Metadata %s", result.metadata_details)
-    |    ${outputCols}
+    |    final_df = result.to_polars()
 
     |    client = storage.Client()
     |    bucket = client.bucket("${config.sharedBucket}")

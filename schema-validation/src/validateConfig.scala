@@ -37,9 +37,6 @@ enum ValidationError:
       sharedBucket: String,
       sharedBuckets: List[String]
   )
-  case MissingOutputColumns(
-      missingColumns: Set[String]
-  )
   case OverlappingPseudoTaskColumns(
       firstTaskName: String,
       secondTaskName: String,
@@ -94,12 +91,6 @@ def validateConfiguration(
         )
       )
     else None,
-    delomaten.outputColumns match
-      case Some(columns) if (pseudoTargetedColumns &~ columns.toSet).nonEmpty =>
-        val missingColumns = pseudoTargetedColumns &~ columns.toSet
-        Some(MissingOutputColumns(missingColumns))
-      case _ => None
-    ,
     pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
   ).flatten
 
@@ -127,14 +118,6 @@ def printErrors(
 
         |Existing shared buckets for $env:
         |  ${sharedBuckets.map("- " + _).mkString("\n  ")}
-        |""".stripMargin.red.newlines)
-      case MissingOutputColumns(missingColumns) =>
-        println(s"""
-        |In the configuration file '$contextualPath' in the field 'output_columns'
-        |not all columns targeted by pseudo operations are listed in the 'output_columns'.
-
-        |The missing columns are:
-        |  ${missingColumns.map("- " + _).mkString("\n  ")}
         |""".stripMargin.red.newlines)
       case OverlappingPseudoTaskColumns(
             firstTaskName,

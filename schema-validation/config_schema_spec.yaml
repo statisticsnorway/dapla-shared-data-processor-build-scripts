@@ -49,18 +49,6 @@ properties:
     type: integer
     minimum: 1
 
-  output_columns:
-    description: |
-      The columns to be outputted when writing the result to the shared bucket.
-      If 'output_columns' isn't specified all columns are outputted.
-    type: array
-    minItems: 1
-    items:
-      type: string
-    errorMessage:
-      minItems: |
-        Validation error in 'output_columns'. The array must contain at least one element.
-
   pseudo:
     description: |
       The pseudonymization tasks to be run
