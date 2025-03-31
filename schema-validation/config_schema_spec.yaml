@@ -10,7 +10,7 @@ title: |
 type: object
 required:
   - shared_bucket
-  - source_folder
+  - source_folder_prefix
   - destination_folder
   - memory_size
   - pseudo
@@ -21,7 +21,7 @@ properties:
       The name of the shared bucket
     type: string
 
-  source_folder:
+  source_folder_prefix:
     description: |
       The folder prefix inside the teams' product bucket from which
       to fetch the files. This path can include a prefix of the file name i.e.
@@ -75,7 +75,7 @@ properties:
         - name
         - columns
         - pseudo_operation
-        - encryption_algorithm
+        - encryption
 
       properties:
         name:
@@ -101,25 +101,42 @@ properties:
           enum:
             - "PSEUDO"
             - "DEPSEUDO"
-            - "REPSEUDO"
+            #- "REPSEUDO"
             #- "REDACT"
 
-        encryption_algorithm:
+        encryption:
           description: |
             What type of encryption to use
-          enum:
-            - "default"
-            - "papis_compatible"
-            - "sid_mapping"
+          type: object
+          additionalProperties: false
+          required:
+            - algorithm
+          properties:
+            algorithm:
+              description: |
+                The specific algorithm.
+              enum:
+                - "default"
+                - "papis_compatible"
+                - "sid_mapping"
 
-        encryption_args:
-          description: |
-            Any additional arguments to pass to the encryption algorithm
-          type: array
-          items:
-            type: object
-            properties:
-              sid_mapping_date:
+            key:
+              description: |
+                The encryption key.
+              enum:
+                - "ssb-common-key-1"
+                - "ssb-common-key-2"
+                - "papis-common-key-1"
+
+            sid_snapshot_date:
+                description: |
+                  The sid catalog snapshot to be used.
                 type: string
                 format: date
-            additionalProperties: false
+
+            sid_on_map_failure:
+              description: |
+                What to do if the sid mapping fails.
+              enum:
+                - "RETURN_NULL"
+                - "RETURN_ORIGINAL"
