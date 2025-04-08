@@ -73,26 +73,33 @@ def validateConfiguration(
   val sharedBuckets: List[String] = loadConfig(sharedBucketsPath)
   val pseudoTargetedColumns: Set[String] =
     delomaten.pseudo.flatMap(_.columns).toSet
-  List(
-    validateConfigSchema(configDataPath) match
+
+  val schemaValidationErrors = validateConfigSchema(configDataPath) match
       case errMessages if errMessages.nonEmpty =>
-        Some(SchemaValidationError(errMessages))
+        Some(ValidationError.SchemaValidationError(errMessages))
       case _ => None
-    ,
-    if !sharedBuckets.exists(bucketShortName =>
-        delomaten.sharedBucket `contains` bucketShortName
-      )
-    then
-      Some(
-        NonExistantSharedBuckets(
-          environment,
-          delomaten.sharedBucket,
-          sharedBuckets
-        )
-      )
-    else None,
-    pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
-  ).flatten
+
+  // We have to check validation errors first, otherwise the
+  // other validations may crash if they can't decode the
+  // configuration properly
+  schemaValidationErrors match
+    case Some(validationError) => List(validationError)
+    case None =>
+      List(
+        if !sharedBuckets.exists(bucketShortName =>
+            delomaten.sharedBucket `contains` bucketShortName
+          )
+        then
+          Some(
+            NonExistantSharedBuckets(
+              environment,
+              delomaten.sharedBucket,
+              sharedBuckets
+            )
+          )
+        else None,
+        pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
+      ).flatten
 
 /** Print error messags for validation errors
   *
