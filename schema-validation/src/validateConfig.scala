@@ -139,8 +139,8 @@ def printErrors(
         |""".stripMargin.red.newlines)
   }
 
-/** Validate if the config.yaml under the @directory_path is valid. Only uses
-  * \@environment and @folder arguments to print more informative logs.
+/** Validate if the config.yaml under the @directoryPath is valid. Only uses
+  * @environment and @folder arguments to print more informative logs.
   *
   * @param environment
   *   the dapla team environment the source belongs to i.e. 'uh-varer-prod' or
