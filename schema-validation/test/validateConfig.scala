@@ -7,7 +7,6 @@ import com.networknt.schema.*
 import scala.jdk.CollectionConverters.*
 import validate.{ValidationError, validateConfiguration}
 import java.nio.file.{Path, Paths}
-import scala.compiletime.uninitialized
 
 enum SchemaType:
   case Config(filepath: String)
