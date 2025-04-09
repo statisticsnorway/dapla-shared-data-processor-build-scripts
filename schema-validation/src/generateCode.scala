@@ -15,11 +15,28 @@ import DataFrameString.*
 import io.circe.syntax.*
 import io.circe.Json
 
+/** Represents a python variable
+  * referencing the dataframe being operated on
+  * or a value of type Result from dapla-toolbelt-pseudo
+  */
 enum DataFrameString:
   case DataFrame
   case Result
 
-@main def generateCode(configDataPath: String): Unit =
+/** Generate 'delomaten' python code from a yaml configuration.
+  *
+  * @param configDataPath
+  *   The filepath to the yaml configuration file.
+  * @param writeFilepath
+  *   An optional filepath for the output file.
+  *
+  * @return Unit
+  */
+// HACK: The [[scala.util.CommandLineParser]] abstraction doesn't support
+// optional positional arguments so @writeFilepath is expressed
+// as a list of arguments instead.
+// TODO: Replace this HACK with `https://github.com/com-lihaoyi/mainargs` library
+@main def generateCode(configDataPath: String, writeFilepath: String*): Unit =
   val configPath: Path = Paths.get(configDataPath)
   if !Files.exists(configPath) then
     println(
@@ -42,8 +59,10 @@ enum DataFrameString:
   println(code.yellow)
 
   writeFile(
-    "process_shared_data.py",
-    code
+    if writeFilepath.nonEmpty
+    then writeFilepath.head
+    else "process_shared_data.py"
+   , code
   )
 
 def writeFile(filename: String, content: String): Try[Unit] =
