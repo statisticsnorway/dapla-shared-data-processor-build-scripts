@@ -64,6 +64,7 @@ def templateCode(
     |from pathlib import Path
     |import polars as pl
     |import sys
+    |import json
 
     |def main(file_path):
     |    try:
@@ -73,20 +74,25 @@ def templateCode(
     |        sys.exit(1)
     |
     |${code}
-    |    logging.info("Metadata %s", result.metadata_details)
+    |    metrics = json.dumps(result.metadata_details, indent=4)
+    |    logging.info("Metrics metadata %s", metrics)
     |    final_df = result.to_polars()
 
     |    client = storage.Client()
     |    bucket = client.bucket("${config.sharedBucket}")
     |    filename = Path(file_path).name
-    |    blob = bucket.blob(str(Path("${config.destinationFolder}", filename)))
+    |    filename_metrics = f"{Path(file_path).stem}_METRICS.json"
+    |    blob_df = bucket.blob(str(Path("${config.destinationFolder}", filename)))
+    |    blob_metrics = bucket.blob(str(Path("${config.destinationFolder}", filename_metrics)))
     |
     |    buffer = io.BytesIO()
     |    final_df.write_parquet(buffer)
     |    buffer.seek(0)
 
-    |    blob.upload_from_file(buffer, content_type="application/octet-stream")
+    |    blob_df.upload_from_file(buffer, content_type="application/octet-stream")
     |    logging.info(f"Result uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename}")
+    |    blob_metrics.upload_from_string(metrics, content_type="application/json")
+    |    logging.info(f"Metrics uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metrics}")
   """.stripMargin
 
 def genPseudoTask(
