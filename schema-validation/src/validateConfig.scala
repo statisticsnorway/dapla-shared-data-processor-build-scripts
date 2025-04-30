@@ -6,7 +6,7 @@
 //> using dep com.networknt:json-schema-validator:1.5.6
 //> using dep ch.qos.logback:logback-classic:1.5.18
 //> using dep "dapla-kuben-resource-model:dapla-kuben-resource-model:1.0.3,url=https://github.com/statisticsnorway/dapla-kuben-resource-model/releases/download/java-v1.0.3/dapla-kuben-resource-model-1.0.3.jar"
-//> using test.dep org.scalameta::munit::1.1.0
+//> using test.dep org.scalameta::munit::1.1.1
 //> using files types.scala configUtils.scala utils.scala
 package validate
 
@@ -106,12 +106,15 @@ def validateConfiguration(
   // configuration properly
   schemaValidationErrors match
     case Some(validationError) => List(validationError)
+
     case None =>
+      val delomatenSharedBuckets: List[SharedBucket] = sharedBuckets
+        .getBuckets()
+        .asScala
+        .toList
+        .filter(bucket => bucket.getType() == SharedBucket.TypeEnum.DELOMAT)
       List(
-        if !sharedBuckets
-            .getBuckets()
-            .asScala
-            .toList
+        if !delomatenSharedBuckets
             .exists(bucket =>
               delomaten.sharedBucket `contains` bucket.getName()
             )
@@ -120,7 +123,7 @@ def validateConfiguration(
             NonExistantSharedBuckets(
               environment,
               delomaten.sharedBucket,
-              sharedBuckets.getBuckets().asScala.toList.map(_.getName())
+              delomatenSharedBuckets.map(_.getName())
             )
           )
         else None,
