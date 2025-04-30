@@ -16,12 +16,11 @@ extension (str: String)
 
 /** Load YAML configuration and decode it into a scala type.
   */
-def loadConfig[A](path: Path)(using decoder: Decoder[A]): A =
+def loadConfig[A](path: Path)(using
+    decoder: Decoder[A]
+): Either[ParsingFailure | DecodingFailure, A] =
   val configData = Source.fromFile(path.toFile()).getLines().mkString("\n")
 
   yaml.parser
     .parse(configData)
-    .leftMap(err => err: Error)
-    .flatMap(_.as(decoder)) match
-    case Left(err)     => throw Exception(s"Error: ${err.getMessage()}")
-    case Right(config) => config
+    .flatMap(_.as(decoder))

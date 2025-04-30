@@ -1,10 +1,11 @@
 //> using scala 3.6.3
 //> using dep org.typelevel::cats-core:2.13.0
 //> using dep io.circe::circe-yaml:1.15.0
-//> using dep io.circe::circe-generic:0.14.12
-//> using dep io.circe::circe-parser:0.14.12
+//> using dep io.circe::circe-generic:0.14.13
+//> using dep io.circe::circe-parser:0.14.13
 //> using dep com.networknt:json-schema-validator:1.5.6
 //> using dep ch.qos.logback:logback-classic:1.5.18
+//> using dep "dapla-kuben-resource-model:dapla-kuben-resource-model:1.0.3,url=https://github.com/statisticsnorway/dapla-kuben-resource-model/releases/download/java-v1.0.3/dapla-kuben-resource-model-1.0.3.jar"
 //> using test.dep org.scalameta::munit::1.1.0
 //> using files types.scala utils.scala
 package validate
@@ -24,6 +25,7 @@ import scala.collection.immutable.*
 import scala.io.Source
 import scala.jdk.CollectionConverters.*
 import scala.util.boundary, boundary.break
+import no.ssb.dapla.kuben.v1.{SharedBucket, SharedBuckets}
 
 /** Represents the different possible validation erros that can occur in a
   * delomaten configuration file.
@@ -69,15 +71,34 @@ def validateConfiguration(
     environment: String
 ): List[ValidationError] =
   import ValidationError.*
-  val delomaten: DelomatenConfig = loadConfig(configDataPath)
-  val sharedBuckets: List[String] = loadConfig(sharedBucketsPath)
+  val delomaten: DelomatenConfig =
+    loadConfig[DelomatenConfig](configDataPath) match
+      case Left(ParsingFailure(msg, _)) =>
+        throw Exception(s"Failed to parse delomaten config: $msg".red.newlines)
+      case Left(error: DecodingFailure) =>
+        throw Exception(
+          s"Failed to decode delomaten config: $error".red.newlines
+        )
+      case Right(config) => config
+  val sharedBuckets: SharedBuckets =
+    loadConfig[SharedBuckets](sharedBucketsPath) match
+      case Left(ParsingFailure(msg, _)) =>
+        throw Exception(
+          s"Failed to parse shared buckets config: $msg".red.newlines
+        )
+      case Left(error: DecodingFailure) =>
+        throw Exception(
+          s"Failed to decode shared buckets config: $error".red.newlines
+        )
+      case Right(config) => config
+
   val pseudoTargetedColumns: Set[String] =
     delomaten.pseudo.flatMap(_.columns).toSet
 
   val schemaValidationErrors = validateConfigSchema(configDataPath) match
-      case errMessages if errMessages.nonEmpty =>
-        Some(ValidationError.SchemaValidationError(errMessages))
-      case _ => None
+    case errMessages if errMessages.nonEmpty =>
+      Some(ValidationError.SchemaValidationError(errMessages))
+    case _ => None
 
   // We have to check validation errors first, otherwise the
   // other validations may crash if they can't decode the
@@ -86,15 +107,19 @@ def validateConfiguration(
     case Some(validationError) => List(validationError)
     case None =>
       List(
-        if !sharedBuckets.exists(bucketShortName =>
-            delomaten.sharedBucket `contains` bucketShortName
-          )
+        if !sharedBuckets
+            .getBuckets()
+            .asScala
+            .toList
+            .exists(bucket =>
+              delomaten.sharedBucket `contains` bucket.getName()
+            )
         then
           Some(
             NonExistantSharedBuckets(
               environment,
               delomaten.sharedBucket,
-              sharedBuckets
+              sharedBuckets.getBuckets().asScala.toList.map(_.getName())
             )
           )
         else None,
@@ -140,7 +165,8 @@ def printErrors(
   }
 
 /** Validate if the config.yaml under the @directoryPath is valid. Only uses
-  * @environment and @folder arguments to print more informative logs.
+  * @environment
+  *   and @folder arguments to print more informative logs.
   *
   * @param environment
   *   the dapla team environment the source belongs to i.e. 'uh-varer-prod' or
