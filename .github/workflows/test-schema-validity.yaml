@@ -26,11 +26,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup caching
         uses: coursier/cache-action@v6.4
-      - name: Setup OpenJDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
       - name: Setup Scala CLI
         uses: VirtusLab/scala-cli-setup@v1.5
       - name: Scala code formatting check
@@ -43,7 +38,7 @@ jobs:
       - name: Run tests
         run: |
           cd schema-validation
-          scala-cli test .
+          scala-cli --jvm zulu:21 test .
   run-delomaten-codegen-tests:
     name: Run code generation tests
     runs-on: ubuntu-latest
@@ -52,11 +47,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup caching
         uses: coursier/cache-action@v6.4
-      - name: Setup OpenJDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
       - name: Setup Scala CLI
         uses: VirtusLab/scala-cli-setup@v1.5
       - name: Install python
@@ -70,4 +60,4 @@ jobs:
 
       - name: Generate python code from valid YAML configurations
         run: |
-          scala-cli run schema-validation/test/generateCode.scala
+          scala-cli --jvm zulu:21 run schema-validation/test/generateCode.scala
