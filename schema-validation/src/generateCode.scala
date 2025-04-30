@@ -3,10 +3,11 @@
 //> using dep io.circe::circe-yaml:1.15.0
 //> using dep io.circe::circe-generic:0.14.13
 //> using dep io.circe::circe-parser:0.14.13
-//> using files types.scala utils.scala
+//> using files types.scala configUtils.scala utils.scala
 //> using dep "dapla-kuben-resource-model:dapla-kuben-resource-model:1.0.3,url=https://github.com/statisticsnorway/dapla-kuben-resource-model/releases/download/java-v1.0.3/dapla-kuben-resource-model-1.0.3.jar"
 
 import com.schemavalidation.types.{given, *}
+import com.schemavalidation.config.utils.*
 import com.schemavalidation.utils.*
 import java.nio.file.{Files, Path, Paths}
 import scala.util.{Try, Using}
@@ -46,7 +47,8 @@ enum DataFrameString:
     )
 
   val config: DelomatenConfig = loadConfig[DelomatenConfig](configPath) match
-    case Left(err) => throw Exception("Unexpected error, couldn't load Delomaten config")
+    case Left(err) =>
+      throw Exception("Unexpected error, couldn't load Delomaten config")
     case Right(config) => config
 
   val pseudoTasks: String =

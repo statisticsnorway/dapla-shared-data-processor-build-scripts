@@ -7,7 +7,7 @@
 //> using dep ch.qos.logback:logback-classic:1.5.18
 //> using dep "dapla-kuben-resource-model:dapla-kuben-resource-model:1.0.3,url=https://github.com/statisticsnorway/dapla-kuben-resource-model/releases/download/java-v1.0.3/dapla-kuben-resource-model-1.0.3.jar"
 //> using test.dep org.scalameta::munit::1.1.0
-//> using files types.scala utils.scala
+//> using files types.scala configUtils.scala utils.scala
 package validate
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -16,6 +16,7 @@ import com.networknt.schema.serialization.JsonNodeReader
 import com.networknt.schema.SpecVersion.VersionFlag
 import com.networknt.schema.*
 import com.schemavalidation.types.{given, *}
+import com.schemavalidation.config.utils.*
 import com.schemavalidation.utils.*
 import io.circe.*
 import io.circe.syntax.*
