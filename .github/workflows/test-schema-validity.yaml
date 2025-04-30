@@ -49,11 +49,14 @@ jobs:
         uses: coursier/cache-action@v6.4
       - name: Setup Scala CLI
         uses: VirtusLab/scala-cli-setup@v1.5
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: Install flake8
         shell: bash
         run: |
-          apt-get update
-          apt-get -y install flake8
+          python -m pip install --upgrade flake8
 
       - name: Generate python code from valid YAML configurations
         run: |
