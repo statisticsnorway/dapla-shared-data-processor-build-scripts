@@ -1,2 +1,10 @@
-- "ledstill"
-- "forbruk"
+version: kuben/v1
+kind: SharedBuckets
+buckets:
+- name: ledstill
+  type: delomat
+  sharedWith:
+  - play-obr-b-developers
+  - play-foeniks-a-developers
+- name: forbruk
+  type: delomat
