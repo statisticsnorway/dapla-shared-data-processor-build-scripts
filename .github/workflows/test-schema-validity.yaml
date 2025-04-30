@@ -38,7 +38,7 @@ jobs:
       - name: Run tests
         run: |
           cd schema-validation
-          scala-cli --jvm zulu:21 test .
+          scala-cli test --jvm zulu:21 .
   run-delomaten-codegen-tests:
     name: Run code generation tests
     runs-on: ubuntu-latest
@@ -60,4 +60,4 @@ jobs:
 
       - name: Generate python code from valid YAML configurations
         run: |
-          scala-cli --jvm zulu:21 run schema-validation/test/generateCode.scala
+          scala-cli run --jvm zulu:21 schema-validation/test/generateCode.scala
