@@ -45,6 +45,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup caching
+        uses: coursier/cache-action@v6.4
+      - name: Setup Scala CLI
+        uses: VirtusLab/scala-cli-setup@v1.5
       - name: Generate python code from valid YAML configurations
         run: |
           scala-cli run schema-validation/test/generateCode.scala
