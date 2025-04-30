@@ -39,3 +39,12 @@ jobs:
         run: |
           cd schema-validation
           scala-cli test .
+  run-delomaten-codegen-tests:
+    name: Run code generation tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Generate python code from valid YAML configurations
+        run: |
+          scala-cli run schema-validation/test/generateCode.scala

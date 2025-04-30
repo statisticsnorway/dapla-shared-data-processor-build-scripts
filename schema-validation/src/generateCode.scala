@@ -15,9 +15,8 @@ import DataFrameString.*
 import io.circe.syntax.*
 import io.circe.Json
 
-/** Represents a python variable
-  * referencing the dataframe being operated on
-  * or a value of type Result from dapla-toolbelt-pseudo
+/** Represents a python variable referencing the dataframe being operated on or
+  * a value of type Result from dapla-toolbelt-pseudo
   */
 enum DataFrameString:
   case DataFrame
@@ -30,7 +29,8 @@ enum DataFrameString:
   * @param writeFilepath
   *   An optional filepath for the output file.
   *
-  * @return Unit
+  * @return
+  *   Unit
   */
 // HACK: The [[scala.util.CommandLineParser]] abstraction doesn't support
 // optional positional arguments so @writeFilepath is expressed
@@ -61,8 +61,8 @@ enum DataFrameString:
   writeFile(
     if writeFilepath.nonEmpty
     then writeFilepath.head
-    else "process_shared_data.py"
-   , code
+    else "process_shared_data.py",
+    code
   )
 
 def writeFile(filename: String, content: String): Try[Unit] =
