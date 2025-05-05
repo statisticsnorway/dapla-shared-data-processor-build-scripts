@@ -16,7 +16,7 @@ pseudo:
       sid_snapshot_date: "2024-03-27"
   - name: task_three
     columns: [ "arbeidssted" ]
-    pseudo_operation: "DEPSEUDO"
+    pseudo_operation: "PSEUDO"
     encryption:
       algorithm: "default"
   - name: task_four

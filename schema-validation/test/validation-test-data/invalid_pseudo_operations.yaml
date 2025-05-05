@@ -10,7 +10,7 @@ pseudo:
       algorithm: "default"
   - name: task_two
     columns: [ "fnr", "snr" ]
-    pseudo_operation: "PSEUDO"
+    pseudo_operation: "DEPSEUDO"
     encryption:
       algorithm: "sid_mapping"
       sid_snapshot_date: "2024-03-27"

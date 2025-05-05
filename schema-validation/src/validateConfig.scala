@@ -45,6 +45,9 @@ enum ValidationError:
       secondTaskName: String,
       overlappingColumns: Set[String]
   )
+  case NonUniformPseudoOperations(
+    pseudoOperations: List[PseudoOperation]
+  )
 
 /** Run all validations on the 'config.yaml' file and return a list of all
   * validation errors found.
@@ -127,7 +130,8 @@ def validateConfiguration(
             )
           )
         else None,
-        pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo)
+        pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo),
+        uniformPseudoOperations(delomaten.pseudo)
       ).flatten
 
 /** Print error messags for validation errors
@@ -152,7 +156,7 @@ def printErrors(
         println(s"""
         |In the configuration file '$contextualPath' in the field 'shared_bucket' the provided bucket '${sharedBucket}' does not exist.
 
-        |Existing shared buckets for $env:
+        |Existing shared buckets of type 'delomat' in $env environment:
         |  ${sharedBuckets.map("- " + _).mkString("\n  ")}
         |""".stripMargin.red.newlines)
       case OverlappingPseudoTaskColumns(
@@ -164,7 +168,15 @@ def printErrors(
         |In the configuration file '$contextualPath' the pseudo tasks '${firstTaskName}' and '${secondTaskName}' target overlapping columns.
 
         |Overlapping columns:
-        |  ${overlappingColumns.map("- " + _).mkString("\n")}
+        |  ${overlappingColumns.map("- " + _).mkString("\n  ")}
+        |""".stripMargin.red.newlines)
+      case NonUniformPseudoOperations(pseudoOperations) =>
+        println(s"""
+        |In the configuration file '$contextualPath' the pseudo tasks contains differing pseudo_operation's.
+        |This is not permitted.
+        |
+        |Non-uniform pseudo_operation's used in the config.yaml:
+        |  ${pseudoOperations.map("- " + _.toString.map(_.toUpper)).mkString("\n  ")}
         |""".stripMargin.red.newlines)
   }
 
@@ -232,11 +244,11 @@ def printErrors(
     s"The '${contextualPath}' configuration was successfully validated!".green.newlines
   )
 
-import ValidationError.OverlappingPseudoTaskColumns
 // Ensure that the pseudo task columns are only targeted once.
 def pseudoTaskColumnsUniquelyTargeted(
     pseudoTasks: List[PseudoTask]
-): Option[OverlappingPseudoTaskColumns] =
+): Option[ValidationError.OverlappingPseudoTaskColumns] =
+  import ValidationError.OverlappingPseudoTaskColumns
   val assocMap: Map[String, List[String]] =
     pseudoTasks.map(task => task.name -> task.columns).toMap
 
@@ -257,6 +269,14 @@ def pseudoTaskColumnsUniquelyTargeted(
             )
           )
     None
+
+// Ensure that the pseudoTasks all have the same type of `PseudoOperation`.
+def uniformPseudoOperations(pseudoTasks: List[PseudoTask]): Option[ValidationError.NonUniformPseudoOperations] =
+  import ValidationError.NonUniformPseudoOperations
+  val pseudoOperations = pseudoTasks.map(_.pseudoOperation)
+  if pseudoOperations.forall(_ == pseudoOperations.head)
+  then None
+  else Some(NonUniformPseudoOperations(pseudoOperations))
 
 def validateConfigSchema(filepath: Path): Set[ValidationMessage] =
   val schemaData: String =
