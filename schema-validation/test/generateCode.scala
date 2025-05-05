@@ -8,7 +8,7 @@ import com.schemavalidation.utils.*
   * they don't contain programatic errors using flake8.
   */
 @main def testCodegenForValidConfigurations(): Unit =
-  val basePath = Paths.get("schema-validation/test/schema-test-data")
+  val basePath = Paths.get("schema-validation/test/data/schema-validation")
   val files = Files.newDirectoryStream(
     basePath,
     { (p: Path) =>
