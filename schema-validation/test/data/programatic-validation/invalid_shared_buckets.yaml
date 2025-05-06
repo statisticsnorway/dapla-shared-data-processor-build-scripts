@@ -1,8 +1,7 @@
-shared_bucket: "ssb-play-obr-data-delt-prod"
+shared_bucket: "somethingelse"
 source_folder_prefix: "ledstill/"
-destination_folder: "/ledstill"
+destination_folder: "ledstill"
 memory_size: 1
-output_columns: [ "fnr", "snr", "fornavn", "arbeidssted", "bolig" ]
 pseudo:
   - name: task_one
     columns: [ "fornavn", "etternavn" ]
@@ -17,7 +16,7 @@ pseudo:
       sid_snapshot_date: "2024-03-27"
   - name: task_three
     columns: [ "arbeidssted" ]
-    pseudo_operation: "DEPSEUDO"
+    pseudo_operation: "PSEUDO"
     encryption:
       algorithm: "default"
   - name: task_four

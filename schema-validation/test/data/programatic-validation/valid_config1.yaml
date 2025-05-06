@@ -1,0 +1,16 @@
+shared_bucket: "forbruk"
+source_folder_prefix: "forbruk/"
+destination_folder: "forbruk"
+memory_size: 3
+pseudo:
+  - name: task_one
+    columns: [ "fnr" ]
+    pseudo_operation: "PSEUDO"
+    encryption:
+      algorithm: "papis_compatible"
+  - name: task_two
+    columns: [ "snr" ]
+    pseudo_operation: "PSEUDO"
+    encryption:
+      algorithm: "sid_mapping"
+      sid_snapshot_date: "2024-03-27"

@@ -59,7 +59,7 @@ class SchemaValidationTests extends munit.FunSuite:
     (1 to 2).foreach { i =>
       val messages =
         validateYaml(
-          SchemaType.Config(s"./test/schema-test-data/valid_data$i.yaml")
+          SchemaType.Config(s"./test/data/schema-validation/valid_data$i.yaml")
         )
       assert(clue(messages.size) == clue(0))
     }
@@ -71,7 +71,9 @@ class SchemaValidationTests extends munit.FunSuite:
     (1 to 5).foreach { i =>
       val messages =
         validateYaml(
-          SchemaType.Config(s"./test/schema-test-data/invalid_data$i.yaml")
+          SchemaType.Config(
+            s"./test/data/schema-validation/invalid_data$i.yaml"
+          )
         )
       assert(clue(messages.size) > clue(0))
     }
@@ -81,7 +83,7 @@ class SchemaValidationTests extends munit.FunSuite:
     setup = { _testOptions =>
       (
         Paths.get("test/validation-tests/config.yaml"),
-        Paths.get("./test/validation-test-data/buckets-shared.yaml"),
+        Paths.get("./test/data/programatic-validation/buckets-shared.yaml"),
         "test"
       )
     },
@@ -91,10 +93,28 @@ class SchemaValidationTests extends munit.FunSuite:
   import ValidationError.*
 
   configurationFixture.test(
-    "Yaml configuration returns schema validation error"
+    "Valid yaml configurations don't return programatic validation errors"
+  ) { (contextualPath, sharedBucketsPath, environment) =>
+    (1 to 2).foreach { i =>
+      val configDataPath: Path =
+        Paths.get(s"./test/data/programatic-validation/valid_config$i.yaml")
+
+      val validationErrors: List[ValidationError] = validateConfiguration(
+        configDataPath,
+        contextualPath,
+        sharedBucketsPath,
+        environment
+      )
+
+      assert(validationErrors.isEmpty)
+    }
+  }
+
+  configurationFixture.test(
+    "Invalid yaml configuration returns schema validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get("./test/validation-test-data/invalid_schema.yaml")
+      Paths.get("./test/data/programatic-validation/invalid_schema.yaml")
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
       contextualPath,
@@ -111,10 +131,12 @@ class SchemaValidationTests extends munit.FunSuite:
   }
 
   configurationFixture.test(
-    "Yaml configuration returns shared buckets validation error"
+    "Invalid yaml configuration returns shared buckets validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get("./test/validation-test-data/invalid_shared_buckets.yaml")
+      Paths.get(
+        "./test/data/programatic-validation/invalid_shared_buckets.yaml"
+      )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
       contextualPath,
@@ -130,31 +152,13 @@ class SchemaValidationTests extends munit.FunSuite:
     )
   }
 
-  // configurationFixture.test(
-  //   "Yaml configuration returns missing output columns validation error"
-  // ) { (contextualPath, sharedBucketsPath, environment) =>
-  //   val configDataPath: Path =
-  //     Paths.get("./test/validation-test-data/invalid_output_columns.yaml")
-  //   val validationErrors: List[ValidationError] = validateConfiguration(
-  //     configDataPath,
-  //     contextualPath,
-  //     sharedBucketsPath,
-  //     environment
-  //   )
-  //   assert(
-  //     validationErrors.exists { err =>
-  //       err match
-  //         case _: MissingOutputColumns => true
-  //         case _                       => false
-  //     }
-  //   )
-  // }
-
   configurationFixture.test(
-    "Yaml configuration returns overlapping pseudo task columns validation error"
+    "Invalid yaml configuration returns overlapping pseudo task columns validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get("./test/validation-test-data/invalid_pseudo_task_columns.yaml")
+      Paths.get(
+        "./test/data/programatic-validation/invalid_pseudo_task_columns.yaml"
+      )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
       contextualPath,
@@ -166,6 +170,28 @@ class SchemaValidationTests extends munit.FunSuite:
         err match
           case _: OverlappingPseudoTaskColumns => true
           case _                               => false
+      }
+    )
+  }
+
+  configurationFixture.test(
+    "Invalid yaml configuration returns non-uniform pseudo operations validation error"
+  ) { (contextualPath, sharedBucketsPath, environment) =>
+    val configDataPath: Path =
+      Paths.get(
+        "./test/data/programatic-validation/invalid_pseudo_operations.yaml"
+      )
+    val validationErrors: List[ValidationError] = validateConfiguration(
+      configDataPath,
+      contextualPath,
+      sharedBucketsPath,
+      environment
+    )
+    assert(
+      validationErrors.exists { err =>
+        err match
+          case _: NonUniformPseudoOperations => true
+          case _                             => false
       }
     )
   }
