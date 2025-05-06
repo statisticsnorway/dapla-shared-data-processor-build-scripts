@@ -46,7 +46,7 @@ enum ValidationError:
       overlappingColumns: Set[String]
   )
   case NonUniformPseudoOperations(
-    pseudoOperations: List[PseudoOperation]
+      pseudoOperations: List[PseudoOperation]
   )
 
 /** Run all validations on the 'config.yaml' file and return a list of all
@@ -176,7 +176,9 @@ def printErrors(
         |This is not permitted.
         |
         |Pseudo operations used in the config.yaml:
-        |  ${pseudoOperations.map("- " + _.toString.map(_.toUpper)).mkString("\n  ")}
+        |  ${pseudoOperations
+                    .map("- " + _.toString.map(_.toUpper))
+                    .mkString("\n  ")}
         |""".stripMargin.red.newlines)
   }
 
@@ -271,7 +273,9 @@ def pseudoTaskColumnsUniquelyTargeted(
     None
 
 // Ensure that the pseudoTasks all have the same type of `PseudoOperation`.
-def uniformPseudoOperations(pseudoTasks: List[PseudoTask]): Option[ValidationError.NonUniformPseudoOperations] =
+def uniformPseudoOperations(
+    pseudoTasks: List[PseudoTask]
+): Option[ValidationError.NonUniformPseudoOperations] =
   import ValidationError.NonUniformPseudoOperations
   val pseudoOperations = pseudoTasks.map(_.pseudoOperation)
   if pseudoOperations.forall(_ == pseudoOperations.head)

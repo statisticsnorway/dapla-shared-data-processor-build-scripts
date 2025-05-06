@@ -71,7 +71,9 @@ class SchemaValidationTests extends munit.FunSuite:
     (1 to 5).foreach { i =>
       val messages =
         validateYaml(
-          SchemaType.Config(s"./test/data/schema-validation/invalid_data$i.yaml")
+          SchemaType.Config(
+            s"./test/data/schema-validation/invalid_data$i.yaml"
+          )
         )
       assert(clue(messages.size) > clue(0))
     }
@@ -132,7 +134,9 @@ class SchemaValidationTests extends munit.FunSuite:
     "Invalid yaml configuration returns shared buckets validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get("./test/data/programatic-validation/invalid_shared_buckets.yaml")
+      Paths.get(
+        "./test/data/programatic-validation/invalid_shared_buckets.yaml"
+      )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
       contextualPath,
@@ -152,7 +156,9 @@ class SchemaValidationTests extends munit.FunSuite:
     "Invalid yaml configuration returns overlapping pseudo task columns validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get("./test/data/programatic-validation/invalid_pseudo_task_columns.yaml")
+      Paths.get(
+        "./test/data/programatic-validation/invalid_pseudo_task_columns.yaml"
+      )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
       contextualPath,
@@ -172,7 +178,9 @@ class SchemaValidationTests extends munit.FunSuite:
     "Invalid yaml configuration returns non-uniform pseudo operations validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get("./test/data/programatic-validation/invalid_pseudo_operations.yaml")
+      Paths.get(
+        "./test/data/programatic-validation/invalid_pseudo_operations.yaml"
+      )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
       contextualPath,
@@ -182,8 +190,8 @@ class SchemaValidationTests extends munit.FunSuite:
     assert(
       validationErrors.exists { err =>
         err match
-          case _: NonUniformPseudoOperations   => true
-          case _                               => false
+          case _: NonUniformPseudoOperations => true
+          case _                             => false
       }
     )
   }
