@@ -175,7 +175,7 @@ def printErrors(
         |In the configuration file '$contextualPath' the pseudo tasks contains differing pseudo_operation's.
         |This is not permitted.
         |
-        |Non-uniform pseudo_operation's used in the config.yaml:
+        |Pseudo operations used in the config.yaml:
         |  ${pseudoOperations.map("- " + _.toString.map(_.toUpper)).mkString("\n  ")}
         |""".stripMargin.red.newlines)
   }
