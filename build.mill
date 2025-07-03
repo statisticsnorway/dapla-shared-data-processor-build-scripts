@@ -1,0 +1,43 @@
+package build
+import mill.*, scalalib.*
+import coursier.maven.MavenRepository
+
+val githubReleases = Seq(
+  MavenRepository("https://maven.pkg.github.com/statisticsnorway/dapla-kuben-resource-model")
+)
+
+trait MyModule extends ScalaModule:
+  override def scalaVersion = "3.6.3"
+  def repositoriesTask = Task.Anon {
+    super.repositoriesTask() ++ githubReleases
+  }
+
+object `schema-validation` extends MyModule:
+  def mvnDeps = Seq(
+      mvn"org.typelevel::cats-core:2.13.0",
+      mvn"io.circe::circe-yaml:1.15.0",
+      mvn"io.circe::circe-generic:0.14.13",
+      mvn"no.ssb.dapla.kuben:dapla-kuben-resource-model:1.0.4",
+  )
+
+object validate extends MyModule:
+  def mainClass = Some("validate.Main")
+  def moduleDeps = Seq(`schema-validation`)
+  def mvnDeps = Seq(
+    mvn"org.typelevel::cats-core:2.13.0",
+    mvn"com.networknt:json-schema-validator:1.5.6",
+    mvn"ch.qos.logback:logback-classic:1.5.18",
+  )
+
+  object test extends ScalaTests with TestModule.Munit:
+    def mvnDeps = Seq(mvn"org.scalameta::munit::1.1.1")
+
+object generate extends MyModule:
+  def mainClass = Some("generate.Main")
+  def moduleDeps = Seq(`schema-validation`)
+  def mvnDeps = Seq(
+    mvn"org.typelevel::cats-core:2.13.0",
+  )
+
+  object test extends ScalaTests with TestModule.Munit:
+    def mvnDeps = Seq(mvn"org.scalameta::munit::1.1.1")

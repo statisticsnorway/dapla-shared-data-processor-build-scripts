@@ -1,10 +1,4 @@
-//> using scala 3.6.3
-//> using dep org.typelevel::cats-core:2.13.0
-//> using dep io.circe::circe-yaml:1.15.0
-//> using dep io.circe::circe-generic:0.14.13
-//> using dep io.circe::circe-parser:0.14.13
-//> using files types.scala configUtils.scala utils.scala
-//> using dep "dapla-kuben-resource-model:dapla-kuben-resource-model:1.0.3,url=https://github.com/statisticsnorway/dapla-kuben-resource-model/releases/download/java-v1.0.3/dapla-kuben-resource-model-1.0.3.jar"
+package generate
 
 import com.schemavalidation.types.{given, *}
 import com.schemavalidation.config.utils.*
@@ -35,41 +29,45 @@ enum DataFrameString:
   * @return
   *   Unit
   */
-// HACK: The [[scala.util.CommandLineParser]] abstraction doesn't support
-// optional positional arguments so @writeFilepath is expressed
-// as a list of arguments instead.
-// TODO: Replace this HACK with `https://github.com/com-lihaoyi/mainargs` library
-@main def generateCode(configDataPath: String, writeFilepath: String*): Unit =
-  val configPath: Path = Paths.get(configDataPath)
-  if !Files.exists(configPath) then
-    println(
-      s"The configuration file at ${configDataPath} does not exist".red.newlines
+object Main:
+  def generateCode(
+      configDataPath: String,
+      writeFilepath: Option[String] = None
+  ): Unit =
+    val configPath: Path = Paths.get(configDataPath)
+    if !Files.exists(configPath) then
+      println(
+        s"The configuration file at ${configDataPath} does not exist".red.newlines
+      )
+
+    val config: DelomatenConfig = loadConfig[DelomatenConfig](configPath) match
+      case Left(err) =>
+        throw Exception("Unexpected error, couldn't load Delomaten config")
+      case Right(config) => config
+
+    val pseudoTasks: String =
+      config.pseudo
+        .groupBy(_.pseudoOperation)
+        .map(genPseudoTask)
+        .zip(LazyList(DataFrame) ++ LazyList.continually(Result))
+        .map { case (f, s) => f(s) }
+        .mkString("\n\n")
+
+    val code = templateCode(config, pseudoTasks)
+
+    println("Python code generated successfully".green.newlines)
+    println(code.yellow)
+
+    writeFile(
+      writeFilepath.getOrElse("process_shared_data.py"),
+      code
     )
 
-  val config: DelomatenConfig = loadConfig[DelomatenConfig](configPath) match
-    case Left(err) =>
-      throw Exception("Unexpected error, couldn't load Delomaten config")
-    case Right(config) => config
-
-  val pseudoTasks: String =
-    config.pseudo
-      .groupBy(_.pseudoOperation)
-      .map(genPseudoTask)
-      .zip(LazyList(DataFrame) ++ LazyList.continually(Result))
-      .map { case (f, s) => f(s) }
-      .mkString("\n\n")
-
-  val code = templateCode(config, pseudoTasks)
-
-  println("Python code generated successfully".green.newlines)
-  println(code.yellow)
-
-  writeFile(
-    if writeFilepath.nonEmpty
-    then writeFilepath.head
-    else "process_shared_data.py",
-    code
-  )
+  def main(args: Array[String]): Unit =
+    args match
+      case Array(configDataPath) => generateCode(configDataPath)
+      case Array(configDataPath, writeFilepath) =>
+        generateCode(configDataPath, Some(writeFilepath))
 
 def writeFile(filename: String, content: String): Try[Unit] =
   Using(BufferedWriter(FileWriter(Paths.get(filename).toFile(), false))) {

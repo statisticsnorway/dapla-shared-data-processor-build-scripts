@@ -6,15 +6,22 @@ import com.networknt.schema.SpecVersion.VersionFlag
 import com.networknt.schema.*
 import scala.jdk.CollectionConverters.*
 import validate.{ValidationError, validateConfiguration}
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Files, Path, Paths}
 
 enum SchemaType:
-  case Config(filepath: String)
+  case Config(filepath: Path)
   case Meta
 
 class SchemaValidationTests extends munit.FunSuite:
-  val schemaData: String =
-    Source.fromFile("./config_schema_spec.yaml").getLines().mkString("\n")
+  // Since mill runs tests inside a sandboxed filepath we need to retrieve the base path
+  // when reading files.
+  val workspaceRoot: Path =
+    Paths.get(sys.env("MILL_WORKSPACE_ROOT"), "schema-validation")
+  def schemaData: String =
+    Source
+      .fromFile(workspaceRoot.resolve("config_schema_spec.yaml").toString)
+      .getLines()
+      .mkString("\n")
 
   def validateYaml(schemaType: SchemaType): Set[ValidationMessage] =
     val yamlMapper: ObjectMapper = ObjectMapper(YAMLFactory())
@@ -38,7 +45,7 @@ class SchemaValidationTests extends munit.FunSuite:
           .getSchema(SchemaLocation.of(SchemaId.V202012), config)
     val data = schemaType match
       case SchemaType.Config(filepath) =>
-        Source.fromFile(filepath).getLines().mkString("\n")
+        Source.fromFile(filepath.toString).getLines().mkString("\n")
       case SchemaType.Meta => schemaData
     schema
       .validate(
@@ -59,7 +66,11 @@ class SchemaValidationTests extends munit.FunSuite:
     (1 to 2).foreach { i =>
       val messages =
         validateYaml(
-          SchemaType.Config(s"./test/data/schema-validation/valid_data$i.yaml")
+          SchemaType.Config(
+            workspaceRoot.resolve(
+              s"test/data/schema-validation/valid_data$i.yaml"
+            )
+          )
         )
       assert(clue(messages.size) == clue(0))
     }
@@ -72,7 +83,9 @@ class SchemaValidationTests extends munit.FunSuite:
       val messages =
         validateYaml(
           SchemaType.Config(
-            s"./test/data/schema-validation/invalid_data$i.yaml"
+            workspaceRoot.resolve(
+              s"test/data/schema-validation/invalid_data$i.yaml"
+            )
           )
         )
       assert(clue(messages.size) > clue(0))
@@ -83,7 +96,9 @@ class SchemaValidationTests extends munit.FunSuite:
     setup = { _testOptions =>
       (
         Paths.get("test/validation-tests/config.yaml"),
-        Paths.get("./test/data/programatic-validation/buckets-shared.yaml"),
+        workspaceRoot.resolve(
+          "test/data/programatic-validation/buckets-shared.yaml"
+        ),
         "test"
       )
     },
@@ -97,7 +112,9 @@ class SchemaValidationTests extends munit.FunSuite:
   ) { (contextualPath, sharedBucketsPath, environment) =>
     (1 to 2).foreach { i =>
       val configDataPath: Path =
-        Paths.get(s"./test/data/programatic-validation/valid_config$i.yaml")
+        workspaceRoot.resolve(
+          s"test/data/programatic-validation/valid_config$i.yaml"
+        )
 
       val validationErrors: List[ValidationError] = validateConfiguration(
         configDataPath,
@@ -114,7 +131,9 @@ class SchemaValidationTests extends munit.FunSuite:
     "Invalid yaml configuration returns schema validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get("./test/data/programatic-validation/invalid_schema.yaml")
+      workspaceRoot.resolve(
+        "test/data/programatic-validation/invalid_schema.yaml"
+      )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
       contextualPath,
@@ -134,8 +153,8 @@ class SchemaValidationTests extends munit.FunSuite:
     "Invalid yaml configuration returns shared buckets validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get(
-        "./test/data/programatic-validation/invalid_shared_buckets.yaml"
+      workspaceRoot.resolve(
+        "test/data/programatic-validation/invalid_shared_buckets.yaml"
       )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
@@ -156,8 +175,8 @@ class SchemaValidationTests extends munit.FunSuite:
     "Invalid yaml configuration returns overlapping pseudo task columns validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get(
-        "./test/data/programatic-validation/invalid_pseudo_task_columns.yaml"
+      workspaceRoot.resolve(
+        "test/data/programatic-validation/invalid_pseudo_task_columns.yaml"
       )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
@@ -178,8 +197,8 @@ class SchemaValidationTests extends munit.FunSuite:
     "Invalid yaml configuration returns non-uniform pseudo operations validation error"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
-      Paths.get(
-        "./test/data/programatic-validation/invalid_pseudo_operations.yaml"
+      workspaceRoot.resolve(
+        "test/data/programatic-validation/invalid_pseudo_operations.yaml"
       )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,

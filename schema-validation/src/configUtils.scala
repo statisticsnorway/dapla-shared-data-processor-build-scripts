@@ -12,7 +12,7 @@ import scala.io.Source
 def loadConfig[A](path: Path)(using
     decoder: Decoder[A]
 ): Either[ParsingFailure | DecodingFailure, A] =
-  val configData = Source.fromFile(path.toFile()).getLines().mkString("\n")
+  val configData = Source.fromFile(path.toFile).getLines().mkString("\n")
 
   yaml.parser
     .parse(configData)

@@ -1,13 +1,3 @@
-//> using scala 3.6.3
-//> using dep org.typelevel::cats-core:2.13.0
-//> using dep io.circe::circe-yaml:1.15.0
-//> using dep io.circe::circe-generic:0.14.13
-//> using dep io.circe::circe-parser:0.14.13
-//> using dep com.networknt:json-schema-validator:1.5.6
-//> using dep ch.qos.logback:logback-classic:1.5.18
-//> using dep "dapla-kuben-resource-model:dapla-kuben-resource-model:1.0.3,url=https://github.com/statisticsnorway/dapla-kuben-resource-model/releases/download/java-v1.0.3/dapla-kuben-resource-model-1.0.3.jar"
-//> using test.dep org.scalameta::munit::1.1.1
-//> using files types.scala configUtils.scala utils.scala
 package validate
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -200,51 +190,56 @@ def printErrors(
   * @return
   *   Unit
   */
-@main def runValidation(
-    environment: String,
-    folder: String,
-    directoryPath: String,
-    sharedBucketsPathStr: String
-): Unit =
+object Main:
+  def runValidation(
+      environment: String,
+      folder: String,
+      directoryPath: String,
+      sharedBucketsPathStr: String
+  ): Unit =
 
-  if !Files.exists(Paths.get(directoryPath)) then
-    println(
-      s"The given directory path ${directoryPath} does not exist".red.newlines
-    )
-    System.exit(1)
-
-  val configDataPath: Path = Paths.get(directoryPath, "config.yaml")
-  val contextualPath: Path = Paths.get(environment, folder, "config.yaml")
-
-  if !Files.exists(configDataPath) then
-    val context = Paths.get(environment, folder)
-    println(
-      s"No 'config.yaml' file exists in the product source folder '${context}'".red.newlines
-    )
-    System.exit(1)
-
-  val sharedBucketsPath: Path = Paths.get(sharedBucketsPathStr)
-
-  if !Files.exists(sharedBucketsPath) then
-    println(
-      s"The given shared-buckets path '${sharedBucketsPath}' does not exist".red.newlines
-    )
-    System.exit(1)
-
-  validateConfiguration(
-    configDataPath,
-    contextualPath,
-    sharedBucketsPath,
-    environment
-  ) match
-    case validationErrors if validationErrors.nonEmpty =>
-      printErrors(contextualPath, validationErrors)
+    if !Files.exists(Paths.get(directoryPath)) then
+      println(
+        s"The given directory path ${directoryPath} does not exist".red.newlines
+      )
       System.exit(1)
-    case _ => ()
 
-  println(
-    s"The '${contextualPath}' configuration was successfully validated!".green.newlines
-  )
+    val configDataPath: Path = Paths.get(directoryPath, "config.yaml")
+    val contextualPath: Path = Paths.get(environment, folder, "config.yaml")
+
+    if !Files.exists(configDataPath) then
+      val context = Paths.get(environment, folder)
+      println(
+        s"No 'config.yaml' file exists in the product source folder '${context}'".red.newlines
+      )
+      System.exit(1)
+
+    val sharedBucketsPath: Path = Paths.get(sharedBucketsPathStr)
+
+    if !Files.exists(sharedBucketsPath) then
+      println(
+        s"The given shared-buckets path '${sharedBucketsPath}' does not exist".red.newlines
+      )
+      System.exit(1)
+
+    validateConfiguration(
+      configDataPath,
+      contextualPath,
+      sharedBucketsPath,
+      environment
+    ) match
+      case validationErrors if validationErrors.nonEmpty =>
+        printErrors(contextualPath, validationErrors)
+        System.exit(1)
+      case _ => ()
+
+    println(
+      s"The '${contextualPath}' configuration was successfully validated!".green.newlines
+    )
+
+  def main(args: Array[String]): Unit =
+    val Array(a, b, c, d) = args
+    runValidation(a, b, c, d)
 
 // Ensure that the pseudo task columns are only targeted once.
 def pseudoTaskColumnsUniquelyTargeted(
@@ -284,7 +279,12 @@ def uniformPseudoOperations(
 
 def validateConfigSchema(filepath: Path): Set[ValidationMessage] =
   val schemaData: String =
-    Source.fromFile("./config_schema_spec.yaml").getLines().mkString("\n")
+    Source
+      .fromFile(
+        s"${sys.env("MILL_WORKSPACE_ROOT")}/schema-validation/config_schema_spec.yaml"
+      )
+      .getLines()
+      .mkString("\n")
   val inputData: String = Source
     .fromFile(filepath.toFile())
     .getLines()
