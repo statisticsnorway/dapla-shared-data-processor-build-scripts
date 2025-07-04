@@ -28,7 +28,7 @@ jobs:
       - uses: coursier/setup-action@v1.3.9
         with:
           jvm: zulu:21.0.7
-          apps: mill-dist:1.0.0-RC3
+          apps: mill:1.0.0-RC3
       - name: Setup coursier credentials
         run: |
           export COURSIER_CREDENTIALS="
@@ -54,7 +54,7 @@ jobs:
       - uses: coursier/setup-action@v1.3.9
         with:
           jvm: zulu:21.0.7
-          apps: mill-dist:1.0.0-RC3
+          apps: mill:1.0.0-RC3
       - name: Setup coursier credentials
         run: |
           export COURSIER_CREDENTIALS="
