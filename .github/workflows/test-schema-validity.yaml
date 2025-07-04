@@ -24,10 +24,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup Nix
-        uses: DeterminateSystems/nix-installer-action@v18
-      - name: Use Nix development shell
-        uses: nicknovitski/nix-develop@v1.2.1
+      - uses: coursier/cache-action@v6.4.7
+      - uses: coursier/setup-action@v1.3.9
+        with:
+          jvm: zulu:21.0.7
+          apps: mill
+      - name: Setup coursier credentials
+        run: |
+          export COURSIER_CREDENTIALS="
+            maven.pkg.github.com ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}
+          "
       - name: Scala code formatting check
         run: |
           mill mill.scalalib.scalafmt/checkFormat || (
@@ -44,10 +50,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup Nix
-        uses: DeterminateSystems/nix-installer-action@v18
-      - name: Use Nix development shell
-        uses: nicknovitski/nix-develop@v1.2.1
+      - uses: coursier/cache-action@v6.4.7
+      - uses: coursier/setup-action@v1.3.9
+        with:
+          jvm: zulu:21.0.7
+          apps: mill
+      - name: Setup coursier credentials
+        run: |
+          export COURSIER_CREDENTIALS="
+            maven.pkg.github.com ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}
+          "
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install flake8
+        shell: bash
+        run: |
+          python -m pip install --upgrade flake8
       - name: Test generating python code from valid YAML configurations
         run: |
           mill generate.test
