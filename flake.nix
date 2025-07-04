@@ -14,6 +14,7 @@
         devShells.default = pkgs.mkShell {
           name = "dev shell";
           packages = with pkgs; [
+            openjdk
             nixd
             python312
             python312Packages.flake8
