@@ -25,7 +25,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Cache mill
-        uses:
         uses: actions/cache@v4
         with:
           path: ~/.cache/mill/download
@@ -55,6 +54,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Cache mill
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mill/download
+          key: ${{ runner.os }}-mill-download-cache
       - uses: coursier/cache-action@v6.4.7
       - uses: coursier/setup-action@v1.3.9
         with:
