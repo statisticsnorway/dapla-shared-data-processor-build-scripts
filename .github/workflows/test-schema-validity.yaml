@@ -24,11 +24,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Cache mill
+        uses:
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mill/download
+          key: ${{ runner.os }}-mill-download-cache
       - uses: coursier/cache-action@v6.4.7
       - uses: coursier/setup-action@v1.3.9
         with:
           jvm: zulu:21.0.7
-          apps: mill:1.0.0-RC3
       - name: Setup coursier credentials
         run: |
           export COURSIER_CREDENTIALS="
@@ -36,14 +41,14 @@ jobs:
           "
       - name: Scala code formatting check
         run: |
-          mill mill.scalalib.scalafmt/checkFormat || (
+          ./mill mill.scalalib.scalafmt/checkFormat || (
             echo "To format code run"
             echo "  mill mill.scalalib.scalafmt/reformat "
             exit 1
           )
       - name: Run schema validation tests
         run: |
-          mill validate.test
+          ./mill validate.test
   run-delomaten-codegen-tests:
     name: Run code generation tests
     runs-on: ubuntu-latest
@@ -54,7 +59,6 @@ jobs:
       - uses: coursier/setup-action@v1.3.9
         with:
           jvm: zulu:21.0.7
-          apps: mill:1.0.0-RC3
       - name: Setup coursier credentials
         run: |
           export COURSIER_CREDENTIALS="
@@ -70,4 +74,4 @@ jobs:
           python -m pip install --upgrade flake8
       - name: Test generating python code from valid YAML configurations
         run: |
-          mill generate.test
+          ./mill generate.test

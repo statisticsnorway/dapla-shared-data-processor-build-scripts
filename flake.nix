@@ -6,10 +6,14 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
-  outputs = inputs@{ flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
-      perSystem = { self', pkgs, ... }: {
+  outputs = inputs @ {flake-parts, ...}:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin"];
+      perSystem = {
+        self',
+        pkgs,
+        ...
+      }: {
         formatter = pkgs.alejandra;
         devShells.default = pkgs.mkShell {
           name = "dev shell";
@@ -26,16 +30,7 @@
             self'.packages.mill
           ];
         };
-        packages.mill = pkgs.mill.overrideAttrs (finalAttrs: prevAttrs: {
-          version = "1.0.0-RC3";
-          src = pkgs.fetchurl {
-            url = "https://repo1.maven.org/maven2/com/lihaoyi/mill-dist/${finalAttrs.version}/mill-dist-${finalAttrs.version}.exe";
-            hash = "sha256-Ldn8OCb8zzq6AUYwuSje5TQf/sGyW3x8JFS9TkYHgdQ=";
-          };
-
-          doInstallCheck = false;
-
-        });
+        packages.mill = pkgs.callPackage ./nix/mill/package.nix {};
       };
     };
 }

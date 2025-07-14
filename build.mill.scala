@@ -1,3 +1,4 @@
+//| mill-version: 1.0.0
 package build
 import mill.*, scalalib.*
 import coursier.maven.MavenRepository
