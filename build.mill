@@ -1,9 +1,7 @@
 //| mill-version: 1.0.0
 package build
-import coursier.Repository
 import mill.*
 import scalalib.*
-import coursier.maven.MavenRepository
 
 val githubReleases = Seq(
   "https://maven.pkg.github.com/statisticsnorway/dapla-kuben-resource-model"
