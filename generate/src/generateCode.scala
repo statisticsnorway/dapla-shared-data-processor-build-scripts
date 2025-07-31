@@ -31,6 +31,7 @@ enum DataFrameString:
   */
 object Main:
   def generateCode(
+      projectDisplayName: String,
       configDataPath: String,
       writeFilepath: Option[String] = None
   ): Unit =
@@ -53,7 +54,8 @@ object Main:
         .map { case (f, s) => f(s) }
         .mkString("\n\n")
 
-    val code = templateCode(config, pseudoTasks)
+    val (projectName, envionment) = splitProjectDisplayName(projectDisplayName)
+    val code = templateCode(projectName, envionment, config, pseudoTasks)
 
     println("Python code generated successfully".green.newlines)
     println(code.yellow)
@@ -65,9 +67,18 @@ object Main:
 
   def main(args: Array[String]): Unit =
     args match
-      case Array(configDataPath) => generateCode(configDataPath)
-      case Array(configDataPath, writeFilepath) =>
-        generateCode(configDataPath, Some(writeFilepath))
+      case Array(projectDisplayName, configDataPath) => generateCode(projectDisplayName, configDataPath)
+      case Array(projectDisplayName, configDataPath, writeFilepath) =>
+        generateCode(projectDisplayName, configDataPath, Some(writeFilepath))
+
+/* Split project display name into project name and environment
+ *
+ * Example:
+ *   "play-obr-test" -> ("play-obr", "test")
+ */
+def splitProjectDisplayName(projectDisplayName: String): (String, String) =
+  val splitIndex = projectDisplayName.lastIndexOf("-")
+  (projectDisplayName.substring(0, splitIndex ), projectDisplayName.substring(splitIndex + 1))
 
 def writeFile(filename: String, content: String): Try[Unit] =
   Using(BufferedWriter(FileWriter(Paths.get(filename).toFile(), false))) {
@@ -76,6 +87,8 @@ def writeFile(filename: String, content: String): Try[Unit] =
   }
 
 def templateCode(
+    projectName: String,
+    environment: String,
     config: DelomatenConfig,
     code: String
 ): String =
@@ -102,7 +115,7 @@ def templateCode(
     |    final_df = result.to_polars()
 
     |    client = storage.Client()
-    |    bucket = client.bucket("${config.sharedBucket}")
+    |    bucket = client.bucket("ssb-${projectName}-data-delt-delomat-${config.sharedBucket}-${environment}")
     |    filename = Path(file_path).name
     |    filename_metrics = f"{Path(file_path).stem}_METRICS.json"
     |    blob_df = bucket.blob(str(Path("${config.destinationFolder}", filename)))
