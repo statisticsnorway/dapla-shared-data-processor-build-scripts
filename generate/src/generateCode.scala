@@ -54,8 +54,8 @@ object Main:
         .map { case (f, s) => f(s) }
         .mkString("\n\n")
 
-    val (projectName, envionment) = splitProjectDisplayName(projectDisplayName)
-    val code = templateCode(projectName, envionment, config, pseudoTasks)
+    val (projectName, environment) = splitProjectDisplayName(projectDisplayName)
+    val code = templateCode(projectName, environment, config, pseudoTasks)
 
     println("Python code generated successfully".green.newlines)
     println(code.yellow)
