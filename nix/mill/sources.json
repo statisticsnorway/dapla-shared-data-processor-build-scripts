@@ -1,0 +1,18 @@
+{
+    "aarch64-darwin": {
+      "artifact-suffix": "native-mac-aarch64",
+      "hash": "sha256-P+b4YO5PV8jUCaEMjCs19Qfavq8zp24obndrjv6y+K0="
+    },
+    "x86_64-darwin": {
+      "artifact-suffix": "native-mac-amd64",
+      "hash": ""
+    },
+    "aarch64-linux": {
+      "artifact-suffix":"native-linux-aarch64",
+      "hash": ""
+    },
+    "x86_64-linux": {
+      "artifact-suffix":"native-linux-amd64",
+      "hash": ""
+    }
+}
