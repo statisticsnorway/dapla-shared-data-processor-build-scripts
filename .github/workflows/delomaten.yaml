@@ -352,6 +352,7 @@ jobs:
 
           cd dapla-shared-data-processor-build-scripts
           ./mill generate.run "$PROJECT_NAME" "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
+          mv process_shared_data.py ../process_shared_data.py
       - name: Build and push image for ${{ matrix.source }}
         run: |
           MATRIX=${{ matrix.source }}
