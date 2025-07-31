@@ -218,7 +218,7 @@ jobs:
 
           export CONFIG_FILE_PATH="$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME"
           export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$PROJECT_NAME/buckets-shared.yaml"
-          cd dapla-shared-data-processor-build-scripts/schema-validation
+          cd dapla-shared-data-processor-build-scripts
 
           ./mill validate.run "$PROJECT_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
 
