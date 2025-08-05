@@ -11,7 +11,7 @@ on:
 
 env:
   # VERSION_OVERRIDE: ${{ inputs.version-override || '' }}
-  VERSION_OVERRIDE: pr-298
+  VERSION_OVERRIDE: pr-310
   # To force ANSI terminial colour output
   TERM: xterm-256color
 
