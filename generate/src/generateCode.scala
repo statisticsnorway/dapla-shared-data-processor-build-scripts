@@ -132,7 +132,7 @@ def templateCode(
     |  def read_and_parse():
     |      return Datadoc(file_path)
     |
-    |  return with_exponential_backoff(read_and_parse, max_delay=5 * 60) # 5 minutes
+    |  return with_exponential_backoff(read_and_parse, max_total_time=5 * 60) # 5 minutes
 
     |def main(file_path):
     |    try:
