@@ -93,6 +93,7 @@ def templateCode(
     code: String
 ): String =
   s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
+    |from dapla_metadata.datasets.core import Datadoc
     |from datetime import date
     |import logging
     |from google.cloud import storage
@@ -101,8 +102,44 @@ def templateCode(
     |import polars as pl
     |import sys
     |import json
+    |import time
+    |import random
+    |import itertools
+
+    |def with_exponential_backoff(io_action, max_total_time, base_delay=1, max_delay=60, max_retries=None):
+    |  def backoff_delays():
+    |      # Generate delays: base * 2^n, capped at max_delay, with jitter
+    |      for n in itertools.count():
+    |          raw = min(base_delay * (2 ** n), max_delay)
+    |          yield raw * random.uniform(0.5, 1.5)
+
+    |  def try_action(delays, deadline, attempt=1):
+    |      try:
+    |          return io_action()
+    |      except Exception as e:
+    |          now = time.time()
+    |          if now >= deadline or (max_retries is not None and attempt > max_retries):
+    |              raise e
+    |          delay = next(delays)
+    |          remaining = deadline - now
+    |          time.sleep(min(delay, max(0, remaining)))
+    |          return try_action(delays, deadline, attempt + 1)
+
+    |  deadline = time.time() + max_total_time
+    |  return try_action(backoff_delays(), deadline)
+
+    |def read_metadata_file(file_path) -> Datadoc:
+    |  def read_and_parse():
+    |      return Datadoc(file_path)
+    |
+    |  return with_exponential_backoff(read_and_parse, max_delay=5 * 60) # 5 minutes
 
     |def main(file_path):
+    |    try:
+    |        datadoc = read_metadata_file(file_path)
+    |    except Exception as e:
+    |        print("Failed to read file as datadoc object:", e)
+    |
     |    try:
     |        df = pl.read_parquet(file_path)
     |    except Exception as e:
@@ -111,6 +148,7 @@ def templateCode(
     |
     |${code}
     |    metrics = json.dumps(result.metadata_details, indent=4)
+    |    metadata = result.datadoc
     |    logging.info("Metrics metadata %s", metrics)
     |    final_df = result.to_polars()
 
@@ -118,8 +156,10 @@ def templateCode(
     |    bucket = client.bucket("ssb-${projectName}-data-delt-delomat-${config.sharedBucket}-${environment}")
     |    filename = Path(file_path).name
     |    filename_metrics = f"{Path(file_path).stem}_METRICS.json"
+    |    filename_metadata = f"{Path(file_path).stem}__DOC.json"
     |    blob_df = bucket.blob(str(Path("${config.destinationFolder}", filename)))
     |    blob_metrics = bucket.blob(str(Path("${config.destinationFolder}", filename_metrics)))
+    |    blob_metadata = bucket.blob(str(Path("${config.destinationFolder}", filename_metadata)))
     |
     |    buffer = io.BytesIO()
     |    final_df.write_parquet(buffer)
@@ -129,6 +169,8 @@ def templateCode(
     |    logging.info(f"Result uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename}")
     |    blob_metrics.upload_from_string(metrics, content_type="application/json")
     |    logging.info(f"Metrics uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metrics}")
+    |    blob_metadata.upload_from_string(metadata, content_type="application/json")
+    |    logging.info(f"Metrics uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metadata}")
   """.stripMargin
 
 def genPseudoTask(
@@ -150,6 +192,7 @@ def genPseudoTask(
       case Result    => "result"
     s"""    result = (
     |      ${pseudoOp}
+    |        .with_metadata(datadoc)
     |        .from_${fromType}(${dataFrameString})
     |${taskBlocks}
     |        .run()
