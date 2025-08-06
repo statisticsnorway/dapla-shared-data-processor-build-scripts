@@ -170,7 +170,7 @@ def templateCode(
     |    blob_metrics.upload_from_string(metrics, content_type="application/json")
     |    logging.info(f"Metrics uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metrics}")
     |    blob_metadata.upload_from_string(metadata, content_type="application/json")
-    |    logging.info(f"Metrics uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metadata}")
+    |    logging.info(f"Metadata uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metadata}")
   """.stripMargin
 
 def genPseudoTask(
