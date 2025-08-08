@@ -1,4 +1,4 @@
-shared_bucket: "ssb-play-obr-data-delt-ledstill-prod"
+shared_bucket: "boette"
 source_folder_prefix: "ledstill/delt/"
 destination_folder: "ledstill/delt"
 memory_size: 2

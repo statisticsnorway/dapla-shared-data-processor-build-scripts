@@ -1,4 +1,5 @@
 import java.nio.file.{Files, Path, Paths}
+import scala.collection.mutable.ListBuffer
 import scala.sys.process.*
 import scala.jdk.CollectionConverters.*
 import com.schemavalidation.utils.*
@@ -22,17 +23,23 @@ class SchemaValidationTests extends munit.FunSuite:
     )
 
     files.asScala.foreach { (path: Path) =>
+      val projectDisplayName = "test-project-prod"
       val filepath = path.toString
       val outputFileName =
         path.getFileName.toString.stripSuffix(".yaml") ++ ".py"
-      Main.generateCode(filepath, Some(outputFileName))
+      Main.generateCode(projectDisplayName, filepath, Some(outputFileName))
 
       val testPythonCode =
-        Seq("flake8", "--config", "flake8conf", outputFileName)
-      val testPythonCodeExitCode = testPythonCode.!
+        Seq("flake8", "--config", workspaceRoot.resolve("flake8conf").toString(), outputFileName)
+
+      val stdoutBuffer = ListBuffer[String]()
+      val logger = ProcessLogger(
+        out => stdoutBuffer += out,
+      )
+      val testPythonCodeExitCode = testPythonCode.!(logger)
       assert(
-        testPythonCodeExitCode != 0,
-        s"Failed to validate python code in $outputFileName"
+        testPythonCodeExitCode == 0,
+        s"Failed to validate python code in $outputFileName\n\n${stdoutBuffer.mkString("\n")}".red
       )
 
       println("Successfully validated python code".green)
