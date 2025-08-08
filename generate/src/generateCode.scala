@@ -105,8 +105,10 @@ def templateCode(
     |import time
     |import random
     |import itertools
+    |import gcsfs
 
-    |def with_exponential_backoff(io_action, max_total_time, base_delay=1, max_delay=60, max_retries=None):
+    |def guard_file_exists(gcs_file_path, max_total_time, base_delay=1, max_delay=60, max_retries=None):
+    |  fs = GCSFileSystem()
     |  def backoff_delays():
     |      # Generate delays: base * 2^n, capped at max_delay, with jitter
     |      for n in itertools.count():
@@ -114,12 +116,12 @@ def templateCode(
     |          yield raw * random.uniform(0.5, 1.5)
 
     |  def try_action(delays, deadline, attempt=1):
-    |      try:
-    |          return io_action()
-    |      except Exception as e:
+    |      if fs.exists(fcs_file_path):
+    |          return True
+    |      else:
     |          now = time.time()
     |          if now >= deadline or (max_retries is not None and attempt > max_retries):
-    |              raise e
+    |              raise FileExistsError(f"Could not find file: {gcs_file_path}")
     |          delay = next(delays)
     |          remaining = deadline - now
     |          time.sleep(min(delay, max(0, remaining)))
@@ -128,17 +130,10 @@ def templateCode(
     |  deadline = time.time() + max_total_time
     |  return try_action(backoff_delays(), deadline)
 
-    |def read_metadata_file(file_path) -> Datadoc:
-    |  def read_and_parse():
-    |      return Datadoc(dataset_path=file_path)
-    |
-    |  return with_exponential_backoff(read_and_parse, max_total_time=5 * 60) # 5 minutes
-
     |def main(file_path):
-    |    try:
-    |        datadoc = read_metadata_file(file_path)
-    |    except Exception as e:
-    |        print("Failed to read file as datadoc object:", e)
+    |    metadata_document_path = Path(file_path).parent / Path(file_path).stem + "__DOC.json"
+    |    guard_file_exists(metadata_document_path, max_total_time=60 * 5) # 5 minutes timeout
+    |    datadoc = Datadoc(metadata_document_path=metadata_document_path)
     |
     |    try:
     |        df = pl.read_parquet(file_path)
