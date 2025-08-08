@@ -116,7 +116,7 @@ def templateCode(
     |          yield raw * random.uniform(0.5, 1.5)
 
     |  def try_action(delays, deadline, attempt=1):
-    |      if fs.exists(fcs_file_path):
+    |      if fs.exists(gcs_file_path):
     |          return True
     |      else:
     |          now = time.time()
