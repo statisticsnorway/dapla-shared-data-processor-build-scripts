@@ -131,7 +131,8 @@ def templateCode(
     |  return try_action(backoff_delays(), deadline)
 
     |def main(file_path):
-    |    metadata_document_path = Path(file_path).parent / (Path(file_path).stem + "__DOC.json")
+    |    pure_path = Path(file_path.removeprefix("gs://"))
+    |    metadata_document_path = "gs://" + str(Path(pure_path).parent / (Path(pure_path).stem + "__DOC.json"))
     |    guard_file_exists(metadata_document_path, max_total_time=60 * 5) # 5 minutes timeout
     |    datadoc = Datadoc(metadata_document_path=metadata_document_path)
     |
