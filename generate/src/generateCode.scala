@@ -105,7 +105,7 @@ def templateCode(
     |import time
     |import random
     |import itertools
-    |import gcsfs
+    |from gcsfs import GCSFileSystem
 
     |def guard_file_exists(gcs_file_path, max_total_time, base_delay=1, max_delay=60, max_retries=None):
     |  fs = GCSFileSystem()
