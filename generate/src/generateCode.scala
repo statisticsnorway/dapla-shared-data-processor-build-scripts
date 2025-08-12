@@ -188,8 +188,8 @@ def genPseudoTask(
       case Result    => "result"
     s"""    result = (
     |      ${pseudoOp}
-    |        .with_metadata(datadoc)
     |        .from_${fromType}(${dataFrameString})
+    |        .with_metadata(datadoc)
     |${taskBlocks}
     |        .run()
     |    )""".stripMargin
