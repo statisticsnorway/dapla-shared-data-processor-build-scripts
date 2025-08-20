@@ -1,0 +1,16 @@
+shared_bucket: "deltmappe"
+source_folder_prefix: "ledstill/"
+destination_folder: "ledstill"
+memory_size: 3
+pseudo:
+  - name: task_one
+    columns: [ "fnr" ]
+    pseudo_operation: "DEPSEUDO"
+    encryption:
+      algorithm: "sid_mapping"
+  - name: task_two
+    columns: [ "snr" ]
+    pseudo_operation: "DEPSEUDO"
+    encryption:
+      algorithm: "sid_mapping"
+      sid_snapshot_date: "2000-01-01"

@@ -12,5 +12,5 @@ pseudo:
     columns: [ "fnr", "snr" ]
     pseudo_operation: "PSEUDO"
     encryption:
-      algorithm: "papis_compatible"
+      algorithm: "sid_mapping"
       key: "papis-common-key-1"

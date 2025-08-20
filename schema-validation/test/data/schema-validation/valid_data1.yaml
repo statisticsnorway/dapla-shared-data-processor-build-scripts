@@ -15,9 +15,3 @@ pseudo:
     encryption:
       algorithm: "sid_mapping"
       sid_snapshot_date: "2024-03-27"
-  - name: task_three
-    columns: [ "bolig" ]
-    pseudo_operation: "DEPSEUDO"
-    encryption:
-      algorithm: "default"
-      key: "ssb-common-key-2"

@@ -201,12 +201,13 @@ def genTaskBlock(task: PseudoTask): String =
     case PapisCompatible(key) =>
       s"with_papis_compatible_encryption(custom_key=${key.asJson})"
     case SidMapping(key, sidSnapshotDate, sidOnMapFailure) =>
-      val date: String =
-        sidSnapshotDate.map(_.toString).getOrElse("str(date.today())")
+      val formattedDate: String = sidSnapshotDate.map { date =>
+        s"\"${SimpleDateFormat("yyyy-MM-dd").format(date)}\""
+      }.getOrElse("str(date.today())")
       val mapStrat: Json = sidOnMapFailure
         .map(_.asJson)
         .getOrElse(SidMapFailureStrategy.ReturnNull.asJson)
-      s"with_stable_id(custom_key=${key.asJson}, sid_snapshot_date=${date}, on_map_failure=${mapStrat})"
+      s"with_stable_id(custom_key=${key.asJson}, sid_snapshot_date=$formattedDate, on_map_failure=$mapStrat)"
 
   val columns = task.columns.map(col => s"\"$col\"").mkString(",")
 
