@@ -10,7 +10,7 @@
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "mill";
-  version = "1.0.0";
+  version = "1.0.3";
   src =
     let
       source = (lib.importJSON sourcesJSON)."${stdenvNoCC.system}";

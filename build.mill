@@ -1,4 +1,4 @@
-//| mill-version: 1.0.0
+//| mill-version: 1.0.3
 //| mill-jvm-version: temurin:21
 package build
 import mill.*
