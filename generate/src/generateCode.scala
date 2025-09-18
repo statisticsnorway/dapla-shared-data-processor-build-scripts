@@ -149,7 +149,7 @@ def templateCode(
     |    final_df = result.to_polars()
 
     |    client = storage.Client()
-    |    bucket = client.bucket("ssb-${projectName}-data-delt-delomat-${config.sharedBucket}-${environment}")
+    |    bucket = client.bucket("ssb-${projectName}-data-delt-${config.sharedBucket}-${environment}")
     |    filename = Path(file_path).name
     |    filename_metrics = f"{Path(file_path).stem}_METRICS.json"
     |    filename_metadata = f"{Path(file_path).stem}__DOC.json"
