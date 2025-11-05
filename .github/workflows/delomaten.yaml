@@ -4,23 +4,22 @@ on:
   workflow_call:
     inputs:
       version-override:
-        description: 'Override a base image version'
-        default: ''
+        description: "Override a base image version"
+        default: ""
         required: false
         type: string
 
 env:
-  # VERSION_OVERRIDE: ${{ inputs.version-override || '' }}
-  VERSION_OVERRIDE: pr-310
+  VERSION_OVERRIDE: ${{ inputs.version-override || '' }}
   # To force ANSI terminial colour output
   TERM: xterm-256color
 
 permissions:
-  contents: 'read'
-  id-token: 'write'
-  issues: 'write'
-  pull-requests: 'write'
-  statuses: 'read'
+  contents: "read"
+  id-token: "write"
+  issues: "write"
+  pull-requests: "write"
+  statuses: "read"
 
 jobs:
   workflow_gatekeeper:
@@ -68,12 +67,12 @@ jobs:
           fetch-depth: 0
       - name: Confirm activation of 'shared-buckets' and 'delomaten' features
         run: |
-           result=$(yq e -o=json infra/projects.yaml | jq '.projects[] | select(.features | index("shared-buckets")) | select(.features | index("delomaten"))')
+          result=$(yq e -o=json infra/projects.yaml | jq '.projects[] | select(.features | index("shared-buckets")) | select(.features | index("delomaten"))')
 
-           if [ -z "$result" ]; then
-             echo "Error: No projects have both the 'shared-buckets' and 'delomaten' features enabled. Both are required to use 'delomaten'."
-             exit 1
-           fi
+          if [ -z "$result" ]; then
+            echo "Error: No projects have both the 'shared-buckets' and 'delomaten' features enabled. Both are required to use 'delomaten'."
+            exit 1
+          fi
       - name: Set output variables
         id: step_output_variables
         run: |
@@ -298,7 +297,7 @@ jobs:
 
   build_and_push:
     if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.fetch_sources.outputs.all_sources_deleted != 'true' && needs.fetch_sources.outputs.matrix != '[]' }}
-    needs: [ fetch_sources ]
+    needs: [fetch_sources]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -383,11 +382,11 @@ jobs:
           workload_identity_provider: ${{ needs.fetch_sources.outputs.workload_identity_provider }}
           service_account: ${{ needs.fetch_sources.outputs.service_account }}
           token_format: "access_token"
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
         with:
-          version: '>= 363.0.0'
-      - name: 'Output project display name and source name'
+          version: ">= 363.0.0"
+      - name: "Output project display name and source name"
         id: source_metadata
         run: |
           MATRIX=${{ matrix.source }}
@@ -398,7 +397,7 @@ jobs:
 
           echo project_display_name=$PROJECT_DISPLAY_NAME >> $GITHUB_OUTPUT
           echo source_name=$SOURCE_NAME >> $GITHUB_OUTPUT
-      - name: 'Output project name'
+      - name: "Output project name"
         id: get_project_name
         env:
           PROJECT_DISPLAY_NAME: ${{ steps.source_metadata.outputs.project_display_name }}
@@ -452,7 +451,7 @@ jobs:
           workload_identity_provider: ${{ needs.fetch_sources.outputs.workload_identity_provider }}
           service_account: ${{steps.output_sa_email.outputs.sa_email}}
           token_format: "access_token"
-      - uses: 'google-github-actions/deploy-cloudrun@v2'
+      - uses: "google-github-actions/deploy-cloudrun@v2"
         env:
           PROJECT_ID: ${{ steps.get_project_id.outputs.project_id }}
           ENV_NAME: ${{ steps.source_metadata.outputs.project_display_name }}
@@ -461,8 +460,8 @@ jobs:
           GCP_SOURCE_NAME: ${{ steps.output_processor_and_source_name.outputs.gcp_source_name }}
           SCALER_NAME: ${{ steps.output_processor_and_source_name.outputs.scaler_name }}
         with:
-          image: 'europe-north1-docker.pkg.dev/artifact-registry-5n/dapla-felles-docker/automation/experimental/scaler:main'
+          image: "europe-north1-docker.pkg.dev/artifact-registry-5n/dapla-felles-docker/automation/experimental/scaler:main"
           service: ${{ env.SCALER_NAME }}
           project_id: ${{ env.PROJECT_ID }}
-          region: 'europe-north1'
+          region: "europe-north1"
           flags: '"--args=-user_image=${{env.TEAM_REGISTRY }}/${{ env.GCP_SOURCE_NAME}}:${{ env.ENV_NAME }}"'
