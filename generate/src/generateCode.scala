@@ -67,7 +67,8 @@ object Main:
 
   def main(args: Array[String]): Unit =
     args match
-      case Array(projectDisplayName, configDataPath) => generateCode(projectDisplayName, configDataPath)
+      case Array(projectDisplayName, configDataPath) =>
+        generateCode(projectDisplayName, configDataPath)
       case Array(projectDisplayName, configDataPath, writeFilepath) =>
         generateCode(projectDisplayName, configDataPath, Some(writeFilepath))
 
@@ -78,7 +79,10 @@ object Main:
  */
 def splitProjectDisplayName(projectDisplayName: String): (String, String) =
   val splitIndex = projectDisplayName.lastIndexOf("-")
-  (projectDisplayName.substring(0, splitIndex ), projectDisplayName.substring(splitIndex + 1))
+  (
+    projectDisplayName.substring(0, splitIndex),
+    projectDisplayName.substring(splitIndex + 1)
+  )
 
 def writeFile(filename: String, content: String): Try[Unit] =
   Using(BufferedWriter(FileWriter(Paths.get(filename).toFile(), false))) {
@@ -121,7 +125,9 @@ def templateCode(
     |      else:
     |          now = time.time()
     |          if now >= deadline or (max_retries is not None and attempt > max_retries):
-    |              raise FileExistsError(f"Could not find file: {gcs_file_path}")
+    |              error_msg = f"Could not find file: {gcs_file_path}"
+    |              logging.error(error_msg)
+    |              raise FileExistsError(error_msg)
     |          delay = next(delays)
     |          remaining = deadline - now
     |          time.sleep(min(delay, max(0, remaining)))
@@ -201,9 +207,11 @@ def genTaskBlock(task: PseudoTask): String =
     case PapisCompatible(key) =>
       s"with_papis_compatible_encryption(custom_key=${key.asJson})"
     case SidMapping(key, sidSnapshotDate, sidOnMapFailure) =>
-      val formattedDate: String = sidSnapshotDate.map { date =>
-        s"\"${SimpleDateFormat("yyyy-MM-dd").format(date)}\""
-      }.getOrElse("str(date.today())")
+      val formattedDate: String = sidSnapshotDate
+        .map { date =>
+          s"\"${SimpleDateFormat("yyyy-MM-dd").format(date)}\""
+        }
+        .getOrElse("str(date.today())")
       val mapStrat: Json = sidOnMapFailure
         .map(_.asJson)
         .getOrElse(SidMapFailureStrategy.ReturnNull.asJson)
