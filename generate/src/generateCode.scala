@@ -109,6 +109,7 @@ def templateCode(
     |import time
     |import random
     |import itertools
+    |from contextlib import contextmanager
     |from gcsfs import GCSFileSystem
 
     |def guard_file_exists(gcs_file_path, max_total_time, base_delay=1, max_delay=60, max_retries=None):
@@ -135,12 +136,22 @@ def templateCode(
 
     |  deadline = time.time() + max_total_time
     |  return try_action(backoff_delays(), deadline)
-
+    |
+    |@contextmanager
+    |def suppress_logging(level=logging.WARNING):
+    |    prev = logging.root.manager.disable
+    |    logging.disable(level)
+    |    try:
+    |        yield
+    |    finally:
+    |        logging.disable(prev)
+    |
     |def main(file_path):
     |    pure_path = Path(file_path.removeprefix("gs://"))
     |    metadata_document_path = "gs://" + str(Path(pure_path).parent / (Path(pure_path).stem + "__DOC.json"))
     |    guard_file_exists(metadata_document_path, max_total_time=60 * 5) # 5 minutes timeout
-    |    datadoc = Datadoc(metadata_document_path=metadata_document_path)
+    |    with suppress_logging():
+    |        datadoc = Datadoc(metadata_document_path=metadata_document_path)
     |
     |    try:
     |        df = pl.read_parquet(file_path)
