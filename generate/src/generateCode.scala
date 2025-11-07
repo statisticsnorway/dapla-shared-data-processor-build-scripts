@@ -140,7 +140,7 @@ def templateCode(
     |    pure_path = Path(file_path.removeprefix("gs://"))
     |    metadata_document_path = "gs://" + str(Path(pure_path).parent / (Path(pure_path).stem + "__DOC.json"))
     |    guard_file_exists(metadata_document_path, max_total_time=60 * 5) # 5 minutes timeout
-    |    datadoc = Datadoc(metadata_document_path=metadata_document_path)
+    |    datadoc = Datadoc(metadata_document_path=metadata_document_path, validate_required_fields_on_existing_metadata=True)
     |
     |    try:
     |        df = pl.read_parquet(file_path)
