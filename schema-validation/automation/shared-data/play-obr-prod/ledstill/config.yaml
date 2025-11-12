@@ -1,0 +1,29 @@
+shared_bucket: "delomatentest"
+source_folder_prefix: "ledstill/"
+destination_folder: "ledstill"
+memory_size: 3
+pseudo:
+  - name: task_one
+    columns: [ "fornavn", "etternavn" ]
+    pseudo_operation: "PSEUDO"
+    encryption:
+      algorithm: "default"
+      key: "ssb-common-key-2"
+  - name: task_two
+    columns: [ "fnr", "snr" ]
+    pseudo_operation: "PSEUDO"
+    encryption:
+      algorithm: "sid_mapping"
+      key: "papis-common-key-1"
+      sid_snapshot_date: "2024-03-27"
+      sid_on_map_failure: "RETURN_ORIGINAL"
+  - name: task_three
+    columns: [ "arbeidssted" ]
+    pseudo_operation: "DEPSEUDO"
+    encryption:
+      algorithm: "default"
+  - name: task_four
+    columns: [ "bolig" ]
+    pseudo_operation: "PSEUDO"
+    encryption:
+      algorithm: "default"
