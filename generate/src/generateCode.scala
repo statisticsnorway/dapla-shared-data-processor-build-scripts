@@ -47,12 +47,13 @@ object Main:
       case Right(config) => config
 
     val pseudoTasks: String =
-      config.pseudo
-        .groupBy(_.pseudoOperation)
-        .map(genPseudoTask)
-        .zip(LazyList(DataFrame) ++ LazyList.continually(Result))
-        .map { case (f, s) => f(s) }
-        .mkString("\n\n")
+      config.operation match
+        case PseudoOperationType.Pseudo(tasks) =>
+          genPseudoTask(tasks)
+        case PseudoOperationType.Depseudo(task) =>
+          val columns =
+            task.columns.map { c => s"\"${c}\"" }.mkString("[", ",", "]")
+          s"|    result = build_and_run_depseudo(df,datadoc,${columns})".stripMargin
 
     val (projectName, environment) = splitProjectDisplayName(projectDisplayName)
     val code = templateCode(projectName, environment, config, pseudoTasks)
@@ -98,11 +99,13 @@ def templateCode(
 ): String =
   s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
     |from dapla_metadata.datasets.core import Datadoc
+    |from dapla_metadata.datasets.utility.utils import VariableType
     |from datetime import date
     |import logging
     |from google.cloud import storage
     |import io
     |from pathlib import Path
+    |from pprint import pformat
     |import polars as pl
     |import sys
     |import json
@@ -135,6 +138,56 @@ def templateCode(
 
     |  deadline = time.time() + max_total_time
     |  return try_action(backoff_delays(), deadline)
+
+    |def get_decryption_algorithm(variable: VariableType)-> tuple[str, dict[str,str | None]]:
+    |    \"\"\"Given a pseudonymized variable, update the depseudonymization builder with the correct algorithm and arguments.\"\"\"
+    |    pseudo_metadata = variable.pseudonymization
+    |    encryption_key_reference = pseudo_metadata.encryption_key_reference
+    |
+    |    if pseudo_metadata.encryption_algorithm == 'TINK-DAEAD':
+    |        return ("default_encryption", {"custom_key": encryption_key_reference})
+    |    elif pseudo_metadata.encryption_algorithm == 'TINK-FPE':
+    |        if pseudo_metadata.stable_identifier_type == 'FREG_SNR' and pseudo_metadata.stable_identifier_version != None:
+    |            failure_strategy: str | None = next((param["failureStrategy"] for param in pseudo_metadata.encryption_algorithm_parameters if "failureStrategy" in param), None)
+    |            return("stable_id", {"custom_key": encryption_key_reference, "sid_snapshot_date": pseudo_metadata.stable_identifier_version, "on_map_failure": failure_strategy})
+    |        elif pseudo_metadata.stable_identifier_type == None and pseudo_metadata.stable_identifier_version == None:
+    |            return("papis_compatible_encryption", {"custom_key": encryption_key_reference})
+    |
+    |    raise ValueError(
+    |        f\"\"\"Cannot determine depseudonymization algorithm used for variable '{variable.short_name}'. Relevant metadata from the 'pseudonymization' field:
+    |
+    |        {pformat(pseudo_metadata)}
+    |        \"\"\"
+    |    )
+    |
+    |def build_and_run_depseudo(df: pl.DataFrame, datadoc_metadata: Datadoc, columns: list[str]) -> Any:
+    |    \"\"\"Create and then execute a depseudonymization builder block based on the datadoc metadata.\"\"\"
+    |    variable_dict: dict[str, VariableType] = (
+    |      {v.short_name:v for v in datadoc_metadata.datadoc_model().datadoc.variables}
+    |    )
+    |    variable_names = list(variable_dict.keys())
+    |    for column in columns:
+    |        if column not in variable_names:
+    |            raise ValueError(
+    |              f"Column '{column}' not found in supplied Datadoc metadata variables {variable_names}"
+    |            )
+    |
+    |    builder = Depseudonymize.from_polars(df).with_metadata(datadoc_metadata)
+    |
+    |    # Dynamically build the 'Depseudonymize' block based on the datadoc pseudonymization metadata
+    |    for column in columns:
+    |        builder = builder.on_fields(column)
+    |        match get_decryption_algorithm(variable_dict[column]):
+    |            case ("default_encryption", kwargs):
+    |                builder = builder.with_default_encryption(**kwargs)
+    |            case ("stable_id", kwargs):
+    |                builder = builder.with_stable_id(**kwargs)
+    |            case ("papis_compatible_encryption", kwargs):
+    |                builder = builder.with_papis_compatible_encryption(**kwargs)
+    |            case else:
+    |                raise ValueError(f"Unexpected match case when building depseudo block\\n{else}")
+    |
+    |    return builder.run()
 
     |def main(file_path):
     |    pure_path = Path(file_path.removeprefix("gs://"))
@@ -176,29 +229,17 @@ def templateCode(
   """.stripMargin
 
 def genPseudoTask(
-    pseudoOperation: PseudoOperation,
     tasks: List[PseudoTask]
-): DataFrameString => String =
-  val pseudoOp = pseudoOperation match
-    case PseudoOperation.Depseudo => "Depseudonymize"
-    case PseudoOperation.Pseudo   => "Pseudonymize"
-
+): String =
   val taskBlocks = tasks.map(genTaskBlock).mkString("\n")
 
-  dataFrame =>
-    val fromType = dataFrame match
-      case DataFrame => "polars"
-      case Result    => "result"
-    val dataFrameString = dataFrame match
-      case DataFrame => "df"
-      case Result    => "result"
-    s"""    result = (
-    |      ${pseudoOp}
-    |        .from_${fromType}(${dataFrameString})
-    |        .with_metadata(datadoc)
-    |${taskBlocks}
-    |        .run()
-    |    )""".stripMargin
+  s"""    result = (
+   |      Pseudonymize
+   |        .from_polars(df)
+   |        .with_metadata(datadoc)
+   |${taskBlocks}
+   |        .run()
+   |    )""".stripMargin
 
 def genTaskBlock(task: PseudoTask): String =
   import EncryptionAlgorithm.*
