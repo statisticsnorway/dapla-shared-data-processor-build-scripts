@@ -98,7 +98,7 @@ jobs:
           if [ -n "$VERSION_OVERRIDE" ]; then
             base_image_version="$VERSION_OVERRIDE"
           else
-            curl -o version.yaml https://raw.githubusercontent.com/statisticsnorway/dapla-shared-data-processor-build-scripts/refs/heads/main/version.yaml
+            curl -o version.yaml https://raw.githubusercontent.com/statisticsnorway/dapla-shared-data-processor-build-scripts/refs/heads/support-reading-depseudo-from-metadatafile/version.yaml
             base_image_version=$(yq e '.version' version.yaml)
           fi
           echo "base_image_version=$base_image_version" >> "$GITHUB_OUTPUT"
