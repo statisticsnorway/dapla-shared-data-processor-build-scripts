@@ -89,7 +89,6 @@ given Decoder[EncryptionAlgorithm] = Decoder.instance { (c: HCursor) =>
 case class PseudoTask(
     name: String,
     columns: List[String],
-    pseudoOperation: PseudoOperation,
     encryption: EncryptionAlgorithm
 )
 
@@ -102,16 +101,58 @@ given Decoder[PseudoTask] = ConfiguredDecoder.derived(using
   Configuration.default.withSnakeCaseMemberNames
 )
 
+// Type representing a depseudonymize task
+case class DepseudoTask(
+    columns: List[String]
+)
+given Decoder[DepseudoTask] = deriveDecoder
+
+// The type of pseudo task
+enum PseudoOperationType:
+  case Pseudo(tasks: List[PseudoTask])
+  case Depseudo(task: DepseudoTask)
+
+given Decoder[PseudoOperationType] = Decoder.instance { cursor =>
+  val tryPseudo = cursor
+    .downField("pseudo")
+    .as[List[PseudoTask]]
+    .map(PseudoOperationType.Pseudo.apply)
+
+  val tryDepseudo = cursor
+    .downField("depseudo")
+    .as[DepseudoTask]
+    .map(PseudoOperationType.Depseudo.apply)
+
+  tryPseudo.orElse(tryDepseudo).left.map { _ =>
+    DecodingFailure(
+      "Expected either { pseudo: [...] } or { depseudo: {...} }",
+      cursor.history
+    )
+  }
+}
+
 case class DelomatenConfig(
     sharedBucket: String,
     sourceFolderPrefix: String,
     destinationFolder: String,
     memorySize: Int,
-    pseudo: List[PseudoTask]
+    operation: PseudoOperationType
 )
-given Decoder[DelomatenConfig] = ConfiguredDecoder.derived(using
-  Configuration.default.withSnakeCaseMemberNames
-)
+given Decoder[DelomatenConfig] = Decoder.instance { c =>
+  for
+    sharedBucket <- c.downField("shared_bucket").as[String]
+    sourceFolderPrefix <- c.downField("source_folder_prefix").as[String]
+    destinationFolder <- c.downField("destination_folder").as[String]
+    memorySize <- c.downField("memory_size").as[Int]
+    operation <- summon[Decoder[PseudoOperationType]].apply(c)
+  yield DelomatenConfig(
+    sharedBucket,
+    sourceFolderPrefix,
+    destinationFolder,
+    memorySize,
+    operation
+  )
+}
 
 // We have to provide custom decoders for the `SharedBuckets` POJO
 // because automatic derivation doesn't work for non-scala classes

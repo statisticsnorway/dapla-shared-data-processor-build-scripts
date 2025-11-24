@@ -17,6 +17,7 @@ import scala.io.Source
 import scala.jdk.CollectionConverters.*
 import scala.util.boundary, boundary.break
 import no.ssb.dapla.kuben.v1.{SharedBucket, SharedBuckets}
+import scala.collection.immutable.ArraySeq.ofInt
 
 /** Represents the different possible validation erros that can occur in a
   * delomaten configuration file.
@@ -35,8 +36,9 @@ enum ValidationError:
       secondTaskName: String,
       overlappingColumns: Set[String]
   )
-  case NonUniformPseudoOperations(
-      pseudoOperations: List[PseudoOperation]
+  // Depseudo operations only consists of one task
+  case OverlappingDepseudoColumns(
+      duplicateColumn: String
   )
 
 /** Run all validations on the 'config.yaml' file and return a list of all
@@ -86,15 +88,16 @@ def validateConfiguration(
         )
       case Right(config) => config
 
-  val pseudoTargetedColumns: Set[String] =
-    delomaten.pseudo.flatMap(_.columns).toSet
+  val pseudoTargetedColumns: Set[String] = delomaten.operation match
+    case PseudoOperationType.Pseudo(tasks)  => tasks.flatMap(_.columns).toSet
+    case PseudoOperationType.Depseudo(task) => task.columns.toSet
 
   val schemaValidationErrors = validateConfigSchema(configDataPath) match
     case errMessages if errMessages.nonEmpty =>
       Some(ValidationError.SchemaValidationError(errMessages))
     case _ => None
 
-  // We have to check validation errors first, otherwise the
+  // We have to check schema validation errors first, otherwise the
   // other validations may crash if they can't decode the
   // configuration properly
   schemaValidationErrors match
@@ -120,8 +123,11 @@ def validateConfiguration(
             )
           )
         else None,
-        pseudoTaskColumnsUniquelyTargeted(delomaten.pseudo),
-        uniformPseudoOperations(delomaten.pseudo)
+        delomaten.operation match
+          case PseudoOperationType.Pseudo(tasks) =>
+            pseudoTaskColumnsUniquelyTargeted(tasks)
+          case PseudoOperationType.Depseudo(task) =>
+            depseudoTaskColumnsUniquelyTargeted(task)
       ).flatten
 
 /** Print error messags for validation errors
@@ -160,15 +166,13 @@ def printErrors(
         |Overlapping columns:
         |  ${overlappingColumns.map("- " + _).mkString("\n  ")}
         |""".stripMargin.red.newlines)
-      case NonUniformPseudoOperations(pseudoOperations) =>
+      case OverlappingDepseudoColumns(duplicateColumn) =>
         println(s"""
-        |In the configuration file '$contextualPath' the pseudo tasks contains differing pseudo_operation's.
+        |In the configuration file '$contextualPath' the depseudo task contains duplicate columns.
         |This is not permitted.
         |
-        |Pseudo operations used in the config.yaml:
-        |  ${pseudoOperations
-                    .map("- " + _.toString.map(_.toUpper))
-                    .mkString("\n  ")}
+        |Duplicate column:
+        |  ${duplicateColumn}
         |""".stripMargin.red.newlines)
   }
 
@@ -241,6 +245,16 @@ object Main:
     val Array(a, b, c, d) = args
     runValidation(a, b, c, d)
 
+// Ensure that the depseudo columns are only targeted once.
+def depseudoTaskColumnsUniquelyTargeted(
+    depseudoTask: DepseudoTask
+): Option[ValidationError.OverlappingDepseudoColumns] =
+  depseudoTask.columns
+    .scanLeft(Set.empty[String])((seen, x) => seen + x)
+    .zip(depseudoTask.columns)
+    .collectFirst { case (seen, x) if seen(x) => x }
+    .map { duplicate => ValidationError.OverlappingDepseudoColumns(duplicate) }
+
 // Ensure that the pseudo task columns are only targeted once.
 def pseudoTaskColumnsUniquelyTargeted(
     pseudoTasks: List[PseudoTask]
@@ -266,16 +280,6 @@ def pseudoTaskColumnsUniquelyTargeted(
             )
           )
     None
-
-// Ensure that the pseudoTasks all have the same type of `PseudoOperation`.
-def uniformPseudoOperations(
-    pseudoTasks: List[PseudoTask]
-): Option[ValidationError.NonUniformPseudoOperations] =
-  import ValidationError.NonUniformPseudoOperations
-  val pseudoOperations = pseudoTasks.map(_.pseudoOperation)
-  if pseudoOperations.forall(_ == pseudoOperations.head)
-  then None
-  else Some(NonUniformPseudoOperations(pseudoOperations))
 
 def validateConfigSchema(filepath: Path): Set[ValidationMessage] =
   val schemaData: String =

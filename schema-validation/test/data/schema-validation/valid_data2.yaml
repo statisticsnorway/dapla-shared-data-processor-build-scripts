@@ -4,13 +4,11 @@ destination_folder: "ledstill/delt"
 memory_size: 2
 pseudo:
   - name: task_one
-    columns: [ "fornavn", "etternavn" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["fornavn", "etternavn"]
     encryption:
       algorithm: "default"
   - name: task_two
-    columns: [ "fnr", "snr" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["fnr"]
     encryption:
       algorithm: "sid_mapping"
       key: "papis-common-key-1"
