@@ -343,7 +343,7 @@ jobs:
       - name: Clone test scripts
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
         run: |
-          git clone -b main https://github.com/statisticsnorway/dapla-shared-data-processor-build-scripts
+          git clone -b support-reading-depseudo-from-metadatafile https://github.com/statisticsnorway/dapla-shared-data-processor-build-scripts
       - name: Build python script for ${{ matrix.source }}
         run: |
           set -x
@@ -351,9 +351,6 @@ jobs:
           IFS=',' read -r FOLDER_NAME PROJECT_NAME <<< "$MATRIX"
 
           cd dapla-shared-data-processor-build-scripts
-          echo "$PROJECT_NAME"
-          echo "$FOLDER_NAME"
-          cat "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
           ./mill generate.run "$PROJECT_NAME" "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
           mv process_shared_data.py ../process_shared_data.py
       - name: Build and push image for ${{ matrix.source }}
