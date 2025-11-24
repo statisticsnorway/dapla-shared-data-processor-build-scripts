@@ -346,10 +346,14 @@ jobs:
           git clone -b main https://github.com/statisticsnorway/dapla-shared-data-processor-build-scripts
       - name: Build python script for ${{ matrix.source }}
         run: |
+          set -x
           MATRIX=${{ matrix.source }}
           IFS=',' read -r FOLDER_NAME PROJECT_NAME <<< "$MATRIX"
 
           cd dapla-shared-data-processor-build-scripts
+          echo "$PROJECT_NAME"
+          echo "$FOLDER_NAME"
+          cat "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
           ./mill generate.run "$PROJECT_NAME" "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
           mv process_shared_data.py ../process_shared_data.py
       - name: Build and push image for ${{ matrix.source }}
