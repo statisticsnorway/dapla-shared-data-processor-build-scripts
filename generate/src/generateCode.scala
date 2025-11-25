@@ -184,8 +184,8 @@ def templateCode(
     |                builder = builder.with_stable_id(**kwargs)
     |            case ("papis_compatible_encryption", kwargs):
     |                builder = builder.with_papis_compatible_encryption(**kwargs)
-    |            case else:
-    |                raise ValueError(f"Unexpected match case when building depseudo block\\n{else}")
+    |            case default:
+    |                raise ValueError(f"Unexpected match case when building depseudo block\\n{default}")
     |
     |    return builder.run()
 
