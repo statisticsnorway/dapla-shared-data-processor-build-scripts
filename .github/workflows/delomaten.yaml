@@ -83,9 +83,7 @@ jobs:
           service_account="gh-actions-${team}@${gar_project_id}.iam.gserviceaccount.com"
           echo "service_account=$service_account" >> $GITHUB_OUTPUT
 
-          # The base image is shared between the source-data and shared-data automation
-          # services
-          base_registry="europe-north1-docker.pkg.dev/${gar_project_id}/dapla-felles-docker/automation/source-data"
+          base_registry="europe-north1-docker.pkg.dev/${gar_project_id}/dapla-felles-docker/automation/shared-data"
           echo "base_registry=$base_registry" >> $GITHUB_OUTPUT
 
           team_registry="europe-north1-docker.pkg.dev/${gar_project_id}/${team}-docker/automation/shared-data"
@@ -122,7 +120,7 @@ jobs:
           set +e
           source_folders=$(ls $automation_directory/* 2>/dev/null)
           set -e
-          # If no source folder exists (automation/source-data/{ENV}/{SOURCE_FOLDER})
+          # If no source folder exists (automation/shared-data/{ENV}/{SOURCE_FOLDER})
           # Then no source is configured in the current branch.
           if [ -z "$source_folders" ]; then
             # Lists all files that have been deleted compared to main in the $automation_directory/{ENV} directory
@@ -266,7 +264,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Wait for plan
-        uses: statisticsnorway/dapla-source-data-processor-build-scripts/.github/actions/wait-for-status@main
+        uses: statisticsnorway/dapla-shared-data-processor-build-scripts/.github/actions/wait-for-status@main
         with:
           timeout: 300
           sleep_time: 5
@@ -286,7 +284,7 @@ jobs:
             })
 
       - name: Wait for apply
-        uses: statisticsnorway/dapla-source-data-processor-build-scripts/.github/actions/wait-for-status@main
+        uses: statisticsnorway/dapla-shared-data-processor-build-scripts/.github/actions/wait-for-status@main
         with:
           timeout: 300
           sleep_time: 5
