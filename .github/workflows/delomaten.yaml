@@ -346,6 +346,7 @@ jobs:
           git clone -b main https://github.com/statisticsnorway/dapla-shared-data-processor-build-scripts
       - name: Build python script for ${{ matrix.source }}
         run: |
+          set -x
           MATRIX=${{ matrix.source }}
           IFS=',' read -r FOLDER_NAME PROJECT_NAME <<< "$MATRIX"
 

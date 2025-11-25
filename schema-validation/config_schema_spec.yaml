@@ -1,8 +1,6 @@
 %YAML 1.1
-
 ---
-
-$schema: 'https://json-schema.org/draft/2020-12/schema'
+$schema: "https://json-schema.org/draft/2020-12/schema"
 
 title: |
   'Delomaten' configuration data
@@ -13,9 +11,12 @@ required:
   - source_folder_prefix
   - destination_folder
   - memory_size
-  - pseudo
-properties:
 
+oneOf:
+  - required: ["pseudo"]
+  - required: ["depseudo"]
+
+properties:
   shared_bucket:
     description: |
       The name of the shared bucket
@@ -40,14 +41,33 @@ properties:
     pattern: "(^([a-zA-Z0-9])[-/a-zA-Z0-9]+[a-zA-Z0-9]$)"
     errorMessage:
       pattern: |
-          Validation error in 'destination_folder' property. Folder prefixes cannot begin or end with a '/' or '-' character
-          and can otherwise only contain alphanumerical characters.
+        Validation error in 'destination_folder' property. Folder prefixes cannot begin or end with a '/' or '-' character
+        and can otherwise only contain alphanumerical characters.
 
   memory_size:
     description: |
       The amount of memory in GiB given to the data automation processor instance
     type: integer
     minimum: 1
+
+  depseudo:
+    description: |
+      The depseudonymization task (singular) to be run
+    type: object
+    required:
+      - columns
+
+    properties:
+      columns:
+        description: |
+          Which columns to target
+        type: array
+        minItems: 1
+        errorMessage:
+          minItems: |
+            Validation error in 'columns'. The array must contain at least one element.
+        items:
+          type: string
 
   pseudo:
     description: |
@@ -56,13 +76,12 @@ properties:
     minItems: 1
     errorMessage:
       minItems: |
-        Validation error in 'output_columns'. The array must contain at least one element.
+        Validation error in 'pseudo tasks'. The array must contain at least one element.
     items:
       type: object
       required:
         - name
         - columns
-        - pseudo_operation
         - encryption
 
       properties:
@@ -82,15 +101,6 @@ properties:
               Validation error in 'columns'. The array must contain at least one element.
           items:
             type: string
-
-        pseudo_operation:
-          description: |
-            What pseudo operation to apply to the targets
-          enum:
-            - "PSEUDO"
-            - "DEPSEUDO"
-            #- "REPSEUDO"
-            #- "REDACT"
 
         encryption:
           description: |
@@ -117,10 +127,10 @@ properties:
                 - "papis-common-key-1"
 
             sid_snapshot_date:
-                description: |
-                  The sid catalog snapshot to be used.
-                type: string
-                format: date
+              description: |
+                The sid catalog snapshot to be used.
+              type: string
+              format: date
 
             sid_on_map_failure:
               description: |

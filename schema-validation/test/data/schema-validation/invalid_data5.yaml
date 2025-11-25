@@ -2,15 +2,14 @@ shared_bucket: "ssb-play-obr-data-delt-ledstill-prod"
 source_folder: "ledstill"
 destination_folder: ""
 memory_size: 2
-# Can't have zero output columns
-output_columns: [  ]
+output_columns: []
 pseudo:
   - name: task_one
-    columns: [ "fnr" ]
+    columns: ["fnr"]
     pseudo_operation: "DEPSEUDO"
     encryption_algorithm: "papis_compatible"
   - name: task_two
-    columns: [ "snr" ]
+    columns: ["snr"]
     pseudo_operation: "PSEUDO"
     encryption_algorithm: "sid_mapping"
     encryption_args:

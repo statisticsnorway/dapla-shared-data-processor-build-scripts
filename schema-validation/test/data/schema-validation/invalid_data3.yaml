@@ -2,4 +2,5 @@ shared_bucket: "testing"
 source_folder: "some/folder"
 destination_folder: "some/folder"
 memory_size: 3
+# Can't have zero pseudo tasks
 pseudo:

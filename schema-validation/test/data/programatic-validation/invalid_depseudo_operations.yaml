@@ -1,0 +1,6 @@
+shared_bucket: "ledstill"
+source_folder_prefix: "ledstill/"
+destination_folder: "ledstill"
+memory_size: 8
+depseudo:
+  columns: [] # cannot have empty columns

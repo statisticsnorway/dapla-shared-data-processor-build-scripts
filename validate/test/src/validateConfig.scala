@@ -63,7 +63,7 @@ class SchemaValidationTests extends munit.FunSuite:
   }
 
   test("Yaml configurations are valid according to the schema specification") {
-    (1 to 2).foreach { i =>
+    (1 to 4).foreach { i =>
       val messages =
         validateYaml(
           SchemaType.Config(
@@ -79,7 +79,7 @@ class SchemaValidationTests extends munit.FunSuite:
   test(
     "Yaml configurations are invalid according to the schema specification"
   ) {
-    (1 to 5).foreach { i =>
+    (1 to 6).foreach { i =>
       val messages =
         validateYaml(
           SchemaType.Config(
@@ -110,7 +110,7 @@ class SchemaValidationTests extends munit.FunSuite:
   configurationFixture.test(
     "Valid yaml configurations don't return programatic validation errors"
   ) { (contextualPath, sharedBucketsPath, environment) =>
-    (1 to 2).foreach { i =>
+    (1 to 3).foreach { i =>
       val configDataPath: Path =
         workspaceRoot.resolve(
           s"test/data/programatic-validation/valid_config$i.yaml"
@@ -194,11 +194,11 @@ class SchemaValidationTests extends munit.FunSuite:
   }
 
   configurationFixture.test(
-    "Invalid yaml configuration returns non-uniform pseudo operations validation error"
+    "Invalid yaml configuration returns validation error for depseudo operations"
   ) { (contextualPath, sharedBucketsPath, environment) =>
     val configDataPath: Path =
       workspaceRoot.resolve(
-        "test/data/programatic-validation/invalid_pseudo_operations.yaml"
+        "test/data/programatic-validation/invalid_depseudo_operations.yaml"
       )
     val validationErrors: List[ValidationError] = validateConfiguration(
       configDataPath,
@@ -209,8 +209,8 @@ class SchemaValidationTests extends munit.FunSuite:
     assert(
       validationErrors.exists { err =>
         err match
-          case _: NonUniformPseudoOperations => true
-          case _                             => false
+          case _: SchemaValidationError => true
+          case _                        => false
       }
     )
   }

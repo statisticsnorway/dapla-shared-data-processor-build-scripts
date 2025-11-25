@@ -4,14 +4,12 @@ destination_folder: "ledstill"
 memory_size: 3
 pseudo:
   - name: task_one
-    columns: [ "fornavn", "etternavn" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["fornavn", "etternavn"]
     encryption:
       algorithm: "default"
       key: "ssb-common-key-1"
   - name: task_two
-    columns: [ "fnr", "snr" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["fnr", "snr"]
     encryption:
       algorithm: "sid_mapping"
-      sid_snapshot_date: "2024-03-27"
+      # sid_snapshot_date: "2024-03-27"
