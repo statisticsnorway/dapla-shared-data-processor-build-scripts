@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dapla-shared-data-processor-build-scripts
+  title: Delomaten build scripts
+  description: |
+    Actions and scripts used to build, deploy and test images used by the Delomaten service.
+  tags:
+    - bash
+    - codegen
+    - pipeline
+    - python
+    - scala
+    - yaml
+  annotations:
+    github.com/project-slug: statisticsnorway/dapla-shared-data-processor-build-scripts
+spec:
+  type: scripts
+  system: delomaten
+  owner: dapla-stat-developers
+  lifecycle: production
