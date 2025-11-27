@@ -6,9 +6,12 @@ metadata:
   description: |
     Actions and scripts used to build, deploy and test images used by the Delomaten service.
   tags:
-    - python
-    - pipeline
     - bash
+    - codegen
+    - pipeline
+    - python
+    - scala
+    - yaml
   annotations:
     github.com/project-slug: statisticsnorway/dapla-shared-data-processor-build-scripts
 spec:
