@@ -8,8 +8,9 @@ val githubReleases = Seq(
   "https://maven.pkg.github.com/statisticsnorway/dapla-kuben-resource-model"
 )
 
-trait MyModule extends ScalaModule:
-  override def scalaVersion = "3.6.3"
+trait MyModule extends ScalaModule with NativeImageModule:
+  override def scalaVersion = "3.7.4"
+  def scalacOptions = Seq("-Yexplicit-nulls")
   def repositories: T[Seq[String]] = super.repositories() ++ githubReleases
 
 object `schema-validation` extends MyModule:

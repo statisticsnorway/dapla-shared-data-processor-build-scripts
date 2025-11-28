@@ -166,7 +166,11 @@ given Decoder[SharedBucket] with
       val bucket = SharedBucket()
       bucket.setName(name)
       bucket.setType(typeOpt.map(SharedBucket.TypeEnum.fromValue).orNull)
-      bucket.setSharedWith(sharedWith.map(_.asJava).orNull)
+      bucket.setSharedWith(
+        sharedWith.orNull match
+          case s: Set[String] => s.asJava
+          case null           => null
+      )
       bucket
 
 given Decoder[SharedBuckets] with
