@@ -16,4 +16,4 @@ def loadConfig[A](path: Path)(using
 
   yaml.parser
     .parse(configData)
-    .flatMap(_.as(decoder))
+    .flatMap(_.as(using decoder))

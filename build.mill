@@ -9,7 +9,8 @@ val githubReleases = Seq(
 )
 
 trait MyModule extends ScalaModule:
-  override def scalaVersion = "3.6.3"
+  override def scalaVersion = "3.7.4"
+  def scalacOptions = Seq("-Yexplicit-nulls")
   def repositories: T[Seq[String]] = super.repositories() ++ githubReleases
 
 object `schema-validation` extends MyModule:
