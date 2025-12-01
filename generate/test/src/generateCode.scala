@@ -30,7 +30,7 @@ class SchemaValidationTests extends munit.FunSuite:
       Main.generateCode(projectDisplayName, filepath, Some(outputFileName))
 
       val testPythonCode =
-        Seq("flake8", "--config", workspaceRoot.resolve("flake8conf").toString(), outputFileName)
+        Seq("ruff", "check", outputFileName)
 
       val stdoutBuffer = ListBuffer[String]()
       val logger = ProcessLogger(
