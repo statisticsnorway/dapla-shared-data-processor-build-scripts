@@ -97,14 +97,12 @@ def templateCode(
     config: DelomatenConfig,
     code: String
 ): String =
-  s"""from dapla_pseudo import Depseudonymize, Pseudonymize, Repseudonymize
+  s"""from dapla_pseudo import Depseudonymize, Pseudonymize # noqa
     |from dapla_metadata.datasets.core import Datadoc
     |from dapla_metadata.datasets.utility.utils import VariableType
-    |from datetime import date
+    |from datetime import date # noqa
     |import logging
-    |from google.cloud import storage
     |from typing import Any
-    |import io
     |from pathlib import Path
     |from pprint import pformat
     |import polars as pl
@@ -148,10 +146,10 @@ def templateCode(
     |    if pseudo_metadata.encryption_algorithm == 'TINK-DAEAD':
     |        return ("default_encryption", {"custom_key": encryption_key_reference})
     |    elif pseudo_metadata.encryption_algorithm == 'TINK-FPE':
-    |        if pseudo_metadata.stable_identifier_type == 'FREG_SNR' and pseudo_metadata.stable_identifier_version != None:
+    |        if pseudo_metadata.stable_identifier_type == 'FREG_SNR' and pseudo_metadata.stable_identifier_version is not None:
     |            failure_strategy: str | None = next((param["failureStrategy"] for param in pseudo_metadata.encryption_algorithm_parameters if "failureStrategy" in param), None)
     |            return("stable_id", {"custom_key": encryption_key_reference, "sid_snapshot_date": pseudo_metadata.stable_identifier_version, "on_map_failure": failure_strategy})
-    |        elif pseudo_metadata.stable_identifier_type == None and pseudo_metadata.stable_identifier_version == None:
+    |        elif pseudo_metadata.stable_identifier_type is None and pseudo_metadata.stable_identifier_version is None:
     |            return("papis_compatible_encryption", {"custom_key": encryption_key_reference})
     |
     |    raise ValueError(
@@ -203,30 +201,28 @@ def templateCode(
     |        sys.exit(1)
     |
     |${code}
-    |    metrics = json.dumps(result.metadata_details, indent=4)
-    |    metadata = result.datadoc
+    |    metrics = json.dumps(result.metadata_details, indent=2)
+    |    metadata = json.dumps(json.loads(result.datadoc), indent=2)
     |    logging.info("Metrics metadata %s", metrics)
     |    final_df = result.to_polars()
 
-    |    client = storage.Client()
-    |    bucket = client.bucket("ssb-${projectName}-data-delt-${config.sharedBucket}-${environment}")
+    |    fs = GCSFileSystem()
     |    filename = Path(file_path).name
     |    filename_metrics = f"{Path(file_path).stem}_METRICS.json"
     |    filename_metadata = f"{Path(file_path).stem}__DOC.json"
-    |    blob_df = bucket.blob(str(Path("${config.destinationFolder}", filename)))
-    |    blob_metrics = bucket.blob(str(Path("${config.destinationFolder}", filename_metrics)))
-    |    blob_metadata = bucket.blob(str(Path("${config.destinationFolder}", filename_metadata)))
-    |
-    |    buffer = io.BytesIO()
-    |    final_df.write_parquet(buffer)
-    |    buffer.seek(0)
+    |    output_path = "ssb-${projectName}-data-delt-${config.sharedBucket}-${environment}/${config.destinationFolder}"
 
-    |    blob_df.upload_from_file(buffer, content_type="application/octet-stream")
-    |    logging.info(f"Result uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename}")
-    |    blob_metrics.upload_from_string(metrics, content_type="application/json")
-    |    logging.info(f"Metrics uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metrics}")
-    |    blob_metadata.upload_from_string(metadata, content_type="application/json")
-    |    logging.info(f"Metadata uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metadata}")
+    |    with fs.open(path=Path(output_path, filename),mode='w') as fh:
+    |        final_df.write_parquet(fh)
+    |        logging.info(f"Result uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename}")
+
+    |    with fs.open(path=Path(output_path, filename_metrics),mode='w') as fh:
+    |        fh.write(metrics)
+    |        logging.info(f"Metrics uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metrics}")
+
+    |    with fs.open(path=Path(output_path, filename_metadata),mode='w') as fh:
+    |        fh.write(metadata)
+    |        logging.info(f"Metadata uploaded to ${config.sharedBucket}/${config.destinationFolder}/{filename_metadata}")
   """.stripMargin
 
 def genPseudoTask(
