@@ -1,0 +1,8 @@
+shared_bucket: "ledstill-bucket"
+source_folder_prefix: "ledstill/"
+destination_folder: "ledstill"
+memory_size: 6
+depseudo:
+  columns:
+    - "fnr"
+    - "fnr_naa"

@@ -34,7 +34,7 @@ object Main:
       projectDisplayName: String,
       configDataPath: String,
       writeFilepath: Option[String] = None
-  ): Unit =
+  ): String =
     val configPath: Path = Paths.get(configDataPath)
     if !Files.exists(configPath) then
       println(
@@ -65,6 +65,8 @@ object Main:
       writeFilepath.getOrElse("process_shared_data.py"),
       code
     )
+
+    code
 
   def main(args: Array[String]): Unit =
     args match
