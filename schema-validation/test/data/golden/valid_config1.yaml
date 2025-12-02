@@ -1,0 +1,23 @@
+shared_bucket: "forbruk"
+source_folder_prefix: "forbruk/"
+destination_folder: "forbruk"
+memory_size: 6
+pseudo:
+  - name: task_one
+    columns:
+      - "fnr"
+    encryption:
+      algorithm: "sid_mapping"
+      sid_on_map_failure: "RETURN_NULL"
+  - name: task_two
+    columns:
+      - "snr"
+    encryption:
+      algorithm: "papis_compatible"
+  - name: task_three
+    columns:
+      - "fornavn"
+      - "etternavn"
+    encryption:
+      algorithm: "default"
+      key: "ssb-common-key-2"
