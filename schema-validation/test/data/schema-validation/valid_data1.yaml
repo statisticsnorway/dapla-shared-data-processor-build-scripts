@@ -1,6 +1,6 @@
 shared_bucket: "boette"
-source_folder_prefix: "ledstill/"
-destination_folder: "ledstill"
+source_folder_prefix: "ledstill_ssd/"
+destination_folder: "ledstill_123"
 memory_size: 3
 pseudo:
   - name: task_one
