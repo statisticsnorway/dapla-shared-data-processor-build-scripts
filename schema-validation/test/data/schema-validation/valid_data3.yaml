@@ -1,6 +1,6 @@
 shared_bucket: "deltmappe"
-source_folder_prefix: "ledstill/"
-destination_folder: "ledstill"
+source_folder_prefix: "led_still/noe1"
+destination_folder: "led_still/noe2"
 memory_size: 3
 pseudo:
   - name: task_one

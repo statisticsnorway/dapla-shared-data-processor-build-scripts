@@ -28,17 +28,18 @@ properties:
       to fetch the files. This path can include a prefix of the file name i.e.
       'folder/start' will match files like 'folder/start_date' and 'folder/start_time'.
     type: string
-    pattern: "(^([a-zA-Z0-9])[-/a-zA-Z0-9]+[/a-zA-Z0-9]$)"
+    pattern: "(^([a-zA-Z0-9])[/a-zA-Z0-9_-]+[/a-zA-Z0-9]$)"
     errorMessage:
       pattern: |
-        Validation error in 'source_folder' property. Folder prefixes cannot begin with a '/' or '-' character, cannot end with a '-' and can otherwise only contain alphanumerical characters.
+        Validation error in 'source_folder' property. Folder prefixes cannot begin with a '/' or '-' character,
+        cannot end with a '-' and can otherwise only contain alphanumerical characters.
 
   destination_folder:
     description: |
       The folder inside the shared bucket from which
       to write the processed files to
     type: string
-    pattern: "(^([a-zA-Z0-9])[-/a-zA-Z0-9]+[a-zA-Z0-9]$)"
+    pattern: "(^([a-zA-Z0-9])[/a-zA-Z0-9_-]+[a-zA-Z0-9]$)"
     errorMessage:
       pattern: |
         Validation error in 'destination_folder' property. Folder prefixes cannot begin or end with a '/' or '-' character
