@@ -137,13 +137,6 @@ given Decoder[PseudoOperationType] = Decoder.instance { cursor =>
           )
         case v => v
     case v => v
-
-  // tryPseudo.orElse(tryDepseudo).left.map { _ =>
-  //  DecodingFailure(
-  //    "Expected either { pseudo: [...] } or { depseudo: {...} }",
-  //    cursor.history
-  //  )
-  // }
 }
 
 case class DelomatenConfig(
