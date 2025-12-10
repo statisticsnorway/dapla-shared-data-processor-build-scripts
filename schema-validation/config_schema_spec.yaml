@@ -109,15 +109,15 @@ properties:
           type: object
           additionalProperties: false
           required:
-            - algorithm
+            - method
           properties:
-            algorithm:
+            method:
               description: |
-                The specific algorithm.
+                The specific algorithm to use for encrypting the data.
               enum:
-                - "default"
-                - "papis_compatible"
-                - "sid_mapping"
+                - "with_default_encryption"
+                - "with_papis_compatible_encryption"
+                - "with_stable_id"
 
             key:
               description: |

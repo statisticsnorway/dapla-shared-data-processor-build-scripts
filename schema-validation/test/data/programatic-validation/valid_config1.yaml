@@ -4,13 +4,11 @@ destination_folder: "forbruk"
 memory_size: 3
 pseudo:
   - name: task_one
-    columns: [ "fnr" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["snr"]
     encryption:
-      algorithm: "papis_compatible"
+      method: "with_papis_compatible_encryption"
   - name: task_two
-    columns: [ "snr" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["fnr"]
     encryption:
-      algorithm: "sid_mapping"
+      method: "with_stable_id"
       sid_snapshot_date: "2024-03-27"

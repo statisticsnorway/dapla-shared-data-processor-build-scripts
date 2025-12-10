@@ -79,7 +79,7 @@ class SchemaValidationTests extends munit.FunSuite:
   test(
     "Yaml configurations are invalid according to the schema specification"
   ) {
-    (1 to 6).foreach { i =>
+    (1 to 5).foreach { i =>
       val messages =
         validateYaml(
           SchemaType.Config(

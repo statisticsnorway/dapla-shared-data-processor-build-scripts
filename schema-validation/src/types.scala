@@ -43,10 +43,10 @@ given Decoder[EncryptionKey] =
 given Encoder[EncryptionKey] =
   ConfiguredEnumEncoder.derived(using encryptionKeyConfig)
 
-enum EncryptionAlgorithm:
+enum EncryptionMethod:
   case Default(encryptionKey: EncryptionKey)
   case PapisCompatible(encryptionKey: EncryptionKey)
-  case SidMapping(
+  case StableID(
       encryptionKey: EncryptionKey,
       sidSnapshotDate: Option[Date],
       sidOnMapFailure: Option[SidMapFailureStrategy]
@@ -61,27 +61,29 @@ given Encoder[Date] = Encoder.instance { (date: Date) =>
   Json.fromString(SimpleDateFormat("yyyy-MM-dd").format(date))
 }
 
-given Decoder[EncryptionAlgorithm] = Decoder.instance { (c: HCursor) =>
+given Decoder[EncryptionMethod] = Decoder.instance { (c: HCursor) =>
   import EncryptionKey.*
-  import EncryptionAlgorithm.*
+  import EncryptionMethod.*
   for
-    algorithm <- c.downField("algorithm").as[String]
+    algorithm <- c.downField("method").as[String]
     key <- c
       .getOrElse("key")(
-        if algorithm == "default" then SsbCommonKey1 else PapisCommonKey1
+        if algorithm == "with_default_encryption" then SsbCommonKey1
+        else PapisCommonKey1
       )
     sidSnapshotDate <- c.downField("sid_snapshot_date").as[Option[Date]]
     sidOnMapFailure <- c
       .downField("sid_on_map_failure")
       .as[Option[SidMapFailureStrategy]]
     decode <- (algorithm, key, sidSnapshotDate, sidOnMapFailure) match
-      case ("sid_mapping", key, snapshotDate, mapFail) =>
-        Right(SidMapping(key, snapshotDate, mapFail))
-      case ("papis_compatible", key, _, _) => Right(PapisCompatible(key))
-      case ("default", key, _, _)          => Right(Default(key))
+      case ("with_stable_id", key, snapshotDate, mapFail) =>
+        Right(StableID(key, snapshotDate, mapFail))
+      case ("with_papis_compatible_encryption", key, _, _) =>
+        Right(PapisCompatible(key))
+      case ("with_default_encryption", key, _, _) => Right(Default(key))
       case _ =>
         Left(
-          DecodingFailure("Failed to decode EncryptionAlgorithm", List.empty)
+          DecodingFailure("Failed to decode EncryptionMethod", List.empty)
         )
   yield decode
 }
@@ -89,7 +91,7 @@ given Decoder[EncryptionAlgorithm] = Decoder.instance { (c: HCursor) =>
 case class PseudoTask(
     name: String,
     columns: List[String],
-    encryption: EncryptionAlgorithm
+    encryption: EncryptionMethod
 )
 
 given Decoder[HashMap[String, String]] with
@@ -123,12 +125,25 @@ given Decoder[PseudoOperationType] = Decoder.instance { cursor =>
     .as[DepseudoTask]
     .map(PseudoOperationType.Depseudo.apply)
 
-  tryPseudo.orElse(tryDepseudo).left.map { _ =>
-    DecodingFailure(
-      "Expected either { pseudo: [...] } or { depseudo: {...} }",
-      cursor.history
-    )
-  }
+  tryPseudo match
+    case Left(errPseudo) =>
+      tryDepseudo match
+        case Left(errDepseudo) =>
+          Left(
+            DecodingFailure(
+              s"Expected either { pseudo: [...] } or { depseudo: {...} }, but failed at decoding both options:\n$errPseudo\n$errDepseudo",
+              cursor.history
+            )
+          )
+        case v => v
+    case v => v
+
+  // tryPseudo.orElse(tryDepseudo).left.map { _ =>
+  //  DecodingFailure(
+  //    "Expected either { pseudo: [...] } or { depseudo: {...} }",
+  //    cursor.history
+  //  )
+  // }
 }
 
 case class DelomatenConfig(

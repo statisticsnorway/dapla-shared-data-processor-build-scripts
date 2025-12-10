@@ -6,9 +6,9 @@ pseudo:
   - name: task_one
     # Pseudo operation can't target zero columns
     columns: []
-    encryption_algorithm: "papis_compatible"
+    encryption:
+      method: "with_papis_compatible_encryption"
   - name: task_two
     columns: ["snr"]
-    encryption_algorithm: "sid_mapping"
-    encryption_args:
-      - sid_mapping_date: "2024-03-27"
+    encryption:
+      method: "with_stable_id"

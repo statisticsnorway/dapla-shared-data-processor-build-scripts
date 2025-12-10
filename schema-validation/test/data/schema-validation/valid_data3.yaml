@@ -6,9 +6,9 @@ pseudo:
   - name: task_one
     columns: ["fnr"]
     encryption:
-      algorithm: "sid_mapping"
+      method: "with_stable_id"
   - name: task_two
     columns: ["snr"]
     encryption:
-      algorithm: "sid_mapping"
+      method: "with_stable_id"
       sid_snapshot_date: "2000-01-01"

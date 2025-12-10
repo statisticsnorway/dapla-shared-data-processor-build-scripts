@@ -1,9 +1,14 @@
-- name: task_one
-  columns: [ "fnr", "snr" ]
-  pseudo_operation: "DEPSEUDO"
-  encryption_algorithm: "papis_compatible"
-- name: task_two
-  columns: [ "fnr", "snr" ]
-  pseudo_operation: "PSEUDO"
-  encryption_algorithm: "sid_mapping"
-  encryption_args: [ "2024-03-27" ]
+shared_bucket: "deltmappe"
+source_folder_prefix: "ledstill/"
+destination_folder: "ledstill"
+memory_size: 3
+pseudo:
+  - name: task_one
+    columns: ["fnr", "snr"]
+    encryption:
+      method: "with_papis_compatible_encryption"
+  - name: task_two
+    columns: ["fnr", "snr"]
+    encryption:
+      method: "with_stable_id"
+      sid_snapshot_date: "2024-03-27"

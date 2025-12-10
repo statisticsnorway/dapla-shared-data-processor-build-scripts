@@ -6,10 +6,10 @@ pseudo:
   - name: task_one
     columns: ["fornavn", "etternavn"]
     encryption:
-      algorithm: "default"
+      method: "with_default_encryption"
       key: "ssb-common-key-1"
   - name: task_two
     columns: ["fnr", "snr"]
     encryption:
-      algorithm: "sid_mapping"
+      method: "with_stable_id"
       # sid_snapshot_date: "2024-03-27"

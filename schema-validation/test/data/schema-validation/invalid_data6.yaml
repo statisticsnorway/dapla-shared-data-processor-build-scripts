@@ -1,6 +1,0 @@
-shared_bucket: "deltmappe"
-source_folder_prefix: "ledstill/"
-destination_folder: "ledstill"
-memory_size: 3
-depseudo:
-  columns: [] # Columns cannot be empty

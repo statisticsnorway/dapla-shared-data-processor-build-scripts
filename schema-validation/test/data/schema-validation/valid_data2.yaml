@@ -6,9 +6,9 @@ pseudo:
   - name: task_one
     columns: ["fornavn", "etternavn"]
     encryption:
-      algorithm: "default"
+      method: "with_default_encryption"
   - name: task_two
     columns: ["fnr"]
     encryption:
-      algorithm: "sid_mapping"
+      method: "with_stable_id"
       key: "papis-common-key-1"
