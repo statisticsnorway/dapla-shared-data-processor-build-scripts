@@ -7,17 +7,17 @@ pseudo:
     columns:
       - "fnr"
     encryption:
-      algorithm: "sid_mapping"
+      method: "with_stable_id"
       sid_on_map_failure: "RETURN_NULL"
   - name: task_two
     columns:
       - "snr"
     encryption:
-      algorithm: "papis_compatible"
+      method: "with_papis_compatible_encryption"
   - name: task_three
     columns:
       - "fornavn"
       - "etternavn"
     encryption:
-      algorithm: "default"
+      method: "with_default_encryption"
       key: "ssb-common-key-2"

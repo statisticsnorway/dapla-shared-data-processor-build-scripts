@@ -4,23 +4,19 @@ destination_folder: "ledstill"
 memory_size: 1
 pseudo:
   - name: task_one
-    columns: [ "fornavn", "etternavn" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["fornavn", "etternavn"]
     encryption:
-      algorithm: "default"
+      method: "with_default_encryption"
   - name: task_two
-    columns: [ "fnr", "snr" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["fnr", "snr"]
     encryption:
-      algorithm: "sid_mapping"
+      method: "with_stable_id"
       sid_snapshot_date: "2024-03-27"
   - name: task_three
-    columns: [ "arbeidssted" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["arbeidssted"]
     encryption:
-      algorithm: "default"
+      method: "with_default_encryption"
   - name: task_four
-    columns: [ "bolig" ]
-    pseudo_operation: "PSEUDO"
+    columns: ["bolig"]
     encryption:
-      algorithm: "default"
+      method: "with_default_encryption"

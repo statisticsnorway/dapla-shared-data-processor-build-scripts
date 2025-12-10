@@ -43,7 +43,9 @@ object Main:
 
     val config: DelomatenConfig = loadConfig[DelomatenConfig](configPath) match
       case Left(err) =>
-        throw Exception("Unexpected error, couldn't load Delomaten config")
+        throw Exception(
+          s"Unexpected error, couldn't load Delomaten config:\n$err"
+        )
       case Right(config) => config
 
     val pseudoTasks: String =
@@ -241,12 +243,12 @@ def genPseudoTask(
    |    )""".stripMargin
 
 def genTaskBlock(task: PseudoTask): String =
-  import EncryptionAlgorithm.*
+  import EncryptionMethod.*
   val encryptAlgo = task.encryption match
     case Default(key) => s"with_default_encryption(custom_key=${key.asJson})"
     case PapisCompatible(key) =>
       s"with_papis_compatible_encryption(custom_key=${key.asJson})"
-    case SidMapping(key, sidSnapshotDate, sidOnMapFailure) =>
+    case StableID(key, sidSnapshotDate, sidOnMapFailure) =>
       val formattedDate: String = sidSnapshotDate
         .map { date =>
           s"\"${SimpleDateFormat("yyyy-MM-dd").format(date)}\""

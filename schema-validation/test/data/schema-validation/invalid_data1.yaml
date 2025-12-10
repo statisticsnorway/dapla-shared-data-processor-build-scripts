@@ -5,8 +5,10 @@ memory_size: 3
 pseudo:
   - name: task_one
     columns: ["snr"]
-    encryption_algorithm: "papis_compatible"
+    encryption:
+      method: "with_papis_compatible_encryption"
   - name: task_two
     columns: ["fnr"]
-    encryption_algorithm: "sid_mapping"
+    encryption:
+      method: "with_stable_id"
     sid_mapping_date: "2024-03-27"
