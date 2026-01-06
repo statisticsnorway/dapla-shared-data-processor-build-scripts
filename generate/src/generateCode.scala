@@ -206,7 +206,7 @@ def templateCode(
     |
     |${code}
     |    metrics = json.dumps(result.metadata_details, indent=2)
-    |    metadata = json.dumps(json.loads(result.datadoc), indent=2)
+    |    metadata = result.datadoc
     |    logging.info("Metrics metadata %s", metrics)
     |    final_df = result.to_polars()
 

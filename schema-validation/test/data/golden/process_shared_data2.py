@@ -103,7 +103,7 @@ def main(file_path):
 
     result = build_and_run_depseudo(df,datadoc,["fnr","fnr_naa"])
     metrics = json.dumps(result.metadata_details, indent=2)
-    metadata = json.dumps(json.loads(result.datadoc), indent=2)
+    metadata = result.datadoc
     logging.info("Metrics metadata %s", metrics)
     final_df = result.to_polars()
 
