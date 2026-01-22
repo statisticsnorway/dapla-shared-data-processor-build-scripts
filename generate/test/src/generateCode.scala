@@ -53,7 +53,7 @@ class SchemaValidationTests extends munit.FunSuite:
     }
   }
 
-  test("Generated code doesn't include any calls to sys.exit") {
+  test("Generated code doesn't include any calls to 'sys.exit'") {
     val files = getFiles("schema-validation", "valid_data", ".yaml")
 
     files.asScala.foreach { (path: Path) =>
