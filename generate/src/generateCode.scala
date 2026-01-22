@@ -110,7 +110,6 @@ def templateCode(
     |from pathlib import Path
     |from pprint import pformat
     |import polars as pl
-    |import sys
     |import json
     |import time
     |import random
@@ -202,7 +201,7 @@ def templateCode(
     |        df = pl.read_parquet(file_path)
     |    except Exception as e:
     |        logging.error(f"Failed to read {file_path} from parquet into dataframe\\n\\n{e}")
-    |        sys.exit(1)
+    |        raise e
     |
     |${code}
     |    metrics = json.dumps(result.metadata_details, indent=2)
