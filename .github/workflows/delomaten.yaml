@@ -351,7 +351,7 @@ jobs:
       - name: Clone test scripts
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
         run: |
-          git clone -b main https://github.com/statisticsnorway/dapla-shared-data-processor-build-scripts
+          git clone -b add-debug-logs https://github.com/statisticsnorway/dapla-shared-data-processor-build-scripts
       - name: Build python script for ${{ matrix.source }}
         run: |
           set -x
