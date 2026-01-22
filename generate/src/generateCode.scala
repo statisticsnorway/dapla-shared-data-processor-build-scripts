@@ -192,14 +192,14 @@ def templateCode(
     |    return builder.run()
 
     |def main(file_path):
-    |    logging.debug(f"Starting script for file: {file_path}")
+    |    logging.info(f"Starting script for file: {file_path}")
     |    pure_path = Path(file_path.removeprefix("gs://"))
     |    metadata_document_path = "gs://" + str(Path(pure_path).parent / (Path(pure_path).stem + "__DOC.json"))
-    |    logging.debug(f"Using metadata document path: {metadata_document_path}")
+    |    logging.info(f"Using metadata document path: {metadata_document_path}")
     |    guard_file_exists(metadata_document_path, max_total_time=60 * 5) # 5 minutes timeout
-    |    logging.debug(f"Metadata document found: {metadata_document_path}")
+    |    logging.info(f"Metadata document found: {metadata_document_path}")
     |    datadoc = Datadoc(metadata_document_path=metadata_document_path,validate_required_fields_on_existing_metadata=True)
-    |    logging.debug(f"Datadoc loaded with variables: {[var.short_name for var in datadoc.datadoc_model().datadoc.variables]}")
+    |    logging.info(f"Datadoc loaded with variables: {[var.short_name for var in datadoc.datadoc_model().datadoc.variables]}")
     |    try:
     |        df = pl.read_parquet(file_path)
     |    except Exception as e:
