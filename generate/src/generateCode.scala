@@ -202,11 +202,13 @@ def templateCode(
     |    logging.info(f"Datadoc loaded with variables: {[var.short_name for var in datadoc.datadoc_model().datadoc.variables]}")
     |    try:
     |        df = pl.read_parquet(file_path)
+    |        logging.info(f"File {file_path} read into dataframe with shape: {df.shape}")
     |    except Exception as e:
     |        logging.error(f"Failed to read {file_path} from parquet into dataframe\\n\\n{e}")
     |        raise e
     |
     |${code}
+    |    logging.info("Pseudonymization/Depseudonymization process completed successfully.")
     |    metrics = json.dumps(result.metadata_details, indent=2)
     |    metadata = result.datadoc
     |    logging.info("Metrics metadata %s", metrics)
