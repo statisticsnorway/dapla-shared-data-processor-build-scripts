@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Fetch main
         run: |
@@ -62,7 +62,7 @@ jobs:
     needs: [workflow_gatekeeper]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Confirm activation of 'shared-buckets' and 'delomaten' features
@@ -186,9 +186,9 @@ jobs:
         # Skipping all steps when all sources have been deleted.
         # This allows the 'test' job to finish successfully.
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup mill caching
-        uses: coursier/cache-action@v7
+        uses: coursier/cache-action@90c37294538be80a558fd665531fcdc2b467b475 # v8.1.0
       - name: Setup coursier credentials
         run: |
           mkdir -p ~/.config/coursier
@@ -223,7 +223,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ready comment
-        uses: actions/github-script@v6
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             github.rest.issues.createComment({
@@ -241,7 +241,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check if PR is mergeable
-        uses: actions/github-script@v6
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { data: pr } = await github.rest.pulls.get({
@@ -258,7 +258,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Wait for plan
         uses: statisticsnorway/dapla-shared-data-processor-build-scripts/.github/actions/wait-for-status@main
@@ -270,7 +270,7 @@ jobs:
             atlantis/plan
 
       - name: Apply
-        uses: actions/github-script@v6
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             github.rest.issues.createComment({
@@ -316,16 +316,16 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: "auth"
         name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v2"
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           workload_identity_provider: ${{ needs.fetch_sources.outputs.workload_identity_provider }}
           service_account: ${{ needs.fetch_sources.outputs.service_account }}
           token_format: "access_token"
       - name: Login to base registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ${{ needs.fetch_sources.outputs.base_registry }}
           username: "oauth2accesstoken"
@@ -333,13 +333,13 @@ jobs:
       - name: Pull base image
         run: docker pull ${{ needs.fetch_sources.outputs.base_registry }}/base-image:${{ needs.fetch_sources.outputs.base_image_version }}
       - name: Login to team registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ${{ needs.fetch_sources.outputs.team_registry }}
           username: "oauth2accesstoken"
           password: "${{ steps.auth.outputs.access_token }}"
       - name: Setup mill caching
-        uses: coursier/cache-action@v7
+        uses: coursier/cache-action@90c37294538be80a558fd665531fcdc2b467b475 #v8.1.0
       - name: Setup coursier credentials
         run: |
           mkdir -p ~/.config/coursier
@@ -386,13 +386,13 @@ jobs:
         uses: actions/checkout@v4
       - id: "auth"
         name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v2"
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           workload_identity_provider: ${{ needs.fetch_sources.outputs.workload_identity_provider }}
           service_account: ${{ needs.fetch_sources.outputs.service_account }}
           token_format: "access_token"
       - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v1"
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
         with:
           version: ">= 363.0.0"
       - name: "Output project display name and source name"
@@ -455,12 +455,12 @@ jobs:
           echo gcp_source_name=$GCP_SOURCE_NAME >> $GITHUB_OUTPUT
       - id: "auth-project-sa"
         name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v2"
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2.1.13
         with:
           workload_identity_provider: ${{ needs.fetch_sources.outputs.workload_identity_provider }}
           service_account: ${{steps.output_sa_email.outputs.sa_email}}
           token_format: "access_token"
-      - uses: "google-github-actions/deploy-cloudrun@v2"
+      - uses: google-github-actions/deploy-cloudrun@2028e2d7d30a78c6910e0632e48dd561b064884d # v3.0.1
         env:
           PROJECT_ID: ${{ steps.get_project_id.outputs.project_id }}
           ENV_NAME: ${{ steps.source_metadata.outputs.project_display_name }}
