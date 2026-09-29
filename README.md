@@ -10,21 +10,7 @@ or the provided nix development environment through `nix develop`. In either cas
 ### Setting up coursier credentials
 
 Since we rely on packages published to 'github packages' it's necessary to provide credentials to coursier for local development
-so that the packages can be read.
-
-Grant GitHub CLI permission to read packages:
-
-```sh
-gh auth refresh -s read:packages
-```
-
-To authenticate Coursier in the current shell session, set the environment variable:
-
-```sh
-export COURSIER_CREDENTIALS="maven.pkg.github.com $(gh api user --jq .login):$(gh auth token)"
-```
-
-For a persistent setup, add your GitHub credentials to the Coursier [property file](https://get-coursier.io/docs/other-credentials#property-file). Your GitHub PAT token can be found using the `gh auth token` command.
+so that the packages can be read. Add your github credentials to the coursier [property file](https://get-coursier.io/docs/other-credentials#property-file). The file should contain the values shown below. Your GitHub PAT token can be found using the `gh auth token` command.
 
 ```
 simple.username=<GITHUB USERNAME>
