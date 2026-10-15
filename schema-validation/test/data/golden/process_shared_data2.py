@@ -1,7 +1,7 @@
 from dapla_pseudo import Depseudonymize, Pseudonymize # noqa
 from dapla_metadata.datasets.core import Datadoc
 from dapla_metadata.datasets.utility.utils import VariableType
-from datetime import date # noqa
+import datetime # noqa: F401, RUF100
 import logging
 from typing import Any
 from pathlib import Path
@@ -12,6 +12,8 @@ import time
 import random
 import itertools
 from gcsfs import GCSFileSystem
+
+logger = logging.getLogger(__name__)
 
 def guard_file_exists(gcs_file_path, max_total_time, base_delay=1, max_delay=60, max_retries=None):
   fs = GCSFileSystem()
@@ -28,7 +30,7 @@ def guard_file_exists(gcs_file_path, max_total_time, base_delay=1, max_delay=60,
           now = time.time()
           if now >= deadline or (max_retries is not None and attempt > max_retries):
               error_msg = f"Could not find file: {gcs_file_path}"
-              logging.error(error_msg)
+              logger.error(error_msg)
               raise FileExistsError(error_msg)
           delay = next(delays)
           remaining = deadline - now
@@ -97,13 +99,13 @@ def main(file_path):
     try:
         df = pl.read_parquet(file_path)
     except Exception as e:
-        logging.error(f"Failed to read {file_path} from parquet into dataframe\n\n{e}")
-        raise e
+        logger.error(f"Failed to read {file_path} from parquet into dataframe\n\n{e}")
+        raise
 
     result = build_and_run_depseudo(df,datadoc,["fnr","fnr_naa"])
     metrics = json.dumps(result.metadata_details, indent=2)
     metadata = result.datadoc
-    logging.info("Metrics metadata %s", metrics)
+    logger.info("Metrics metadata %s", metrics)
     final_df = result.to_polars()
 
     fs = GCSFileSystem()
@@ -114,12 +116,12 @@ def main(file_path):
 
     with fs.open(path=Path(output_path, filename),mode='w') as fh:
         final_df.write_parquet(fh)
-        logging.info(f"Result uploaded to ledstill-bucket/ledstill/{filename}")
+        logger.info(f"Result uploaded to ledstill-bucket/ledstill/{filename}")
 
     with fs.open(path=Path(output_path, filename_metrics),mode='w') as fh:
         fh.write(metrics)
-        logging.info(f"Metrics uploaded to ledstill-bucket/ledstill/{filename_metrics}")
+        logger.info(f"Metrics uploaded to ledstill-bucket/ledstill/{filename_metrics}")
 
     with fs.open(path=Path(output_path, filename_metadata),mode='w') as fh:
         fh.write(metadata)
-        logging.info(f"Metadata uploaded to ledstill-bucket/ledstill/{filename_metadata}")
+        logger.info(f"Metadata uploaded to ledstill-bucket/ledstill/{filename_metadata}")
