@@ -188,7 +188,7 @@ jobs:
         if: ${{ needs.fetch_sources.outputs.all_sources_deleted != 'true' }}
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup mill caching
-        uses: coursier/cache-action@90c37294538be80a558fd665531fcdc2b467b475 # v8.1.0
+        uses: coursier/cache-action@95e5b1029b6b86e7bac033ee44a0697d8a527d2d # v8.1.1
       - name: Setup coursier credentials
         run: |
           mkdir -p ~/.config/coursier
@@ -339,7 +339,7 @@ jobs:
           username: "oauth2accesstoken"
           password: "${{ steps.auth.outputs.access_token }}"
       - name: Setup mill caching
-        uses: coursier/cache-action@90c37294538be80a558fd665531fcdc2b467b475 #v8.1.0
+        uses: coursier/cache-action@95e5b1029b6b86e7bac033ee44a0697d8a527d2d #v8.1.1
       - name: Setup coursier credentials
         run: |
           mkdir -p ~/.config/coursier
