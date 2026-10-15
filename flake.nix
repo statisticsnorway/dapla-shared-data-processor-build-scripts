@@ -3,7 +3,7 @@
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
   };
 
   outputs = inputs @ {flake-parts, ...}:
@@ -19,8 +19,8 @@
           packages = with pkgs; [
             openjdk
             nixd
-            python312
-            python312Packages.flake8
+            python314
+            python314Packages.flake8
             ruff
             uv
             yaml-language-server
