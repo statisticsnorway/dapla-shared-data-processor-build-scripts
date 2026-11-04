@@ -214,7 +214,7 @@ jobs:
           export SHARED_BUCKETS_FILE_PATH="$GITHUB_WORKSPACE/infra/projects/$PROJECT_NAME/buckets-shared.yaml"
           cd dapla-shared-data-processor-build-scripts
 
-          ./mill validate.run "$PROJECT_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
+          ./mill --no-daemon validate.run "$PROJECT_NAME" "$FOLDER_NAME" "$CONFIG_FILE_PATH" "$SHARED_BUCKETS_FILE_PATH"
 
   plan:
     if: ${{ github.event_name == 'pull_request' }}
@@ -359,7 +359,7 @@ jobs:
           IFS=',' read -r FOLDER_NAME PROJECT_NAME <<< "$MATRIX"
 
           cd dapla-shared-data-processor-build-scripts
-          ./mill generate.run "$PROJECT_NAME" "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
+          ./mill --no-daemon generate.run "$PROJECT_NAME" "$GITHUB_WORKSPACE/automation/shared-data/$PROJECT_NAME/$FOLDER_NAME/config.yaml"
           mv process_shared_data.py ../process_shared_data.py
       - name: Build and push image for ${{ matrix.source }}
         run: |
